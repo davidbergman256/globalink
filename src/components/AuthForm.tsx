@@ -19,15 +19,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [funFact, setFunFact] = useState('')
   const [talkForHours, setTalkForHours] = useState('')
   const [loading, setLoading] = useState(false)
-  const [resendingEmail, setResendingEmail] = useState(false)
   const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-    setMessage('')
 
     try {
       if (mode === 'signup') {
@@ -52,7 +49,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           if (profileError) throw profileError
         }
         
-        router.push('/login?message=Check your email to confirm your account')
+        router.push('/')
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -65,32 +62,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
       setError(error.message)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleResendConfirmation = async () => {
-    if (!email) {
-      setError('Please enter your email address first')
-      return
-    }
-
-    setResendingEmail(true)
-    setError('')
-    setMessage('')
-
-    try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
-      })
-      
-      if (error) throw error
-      
-      setMessage('Confirmation email sent! Please check your inbox.')
-    } catch (error: any) {
-      setError(error.message)
-    } finally {
-      setResendingEmail(false)
     }
   }
 
@@ -214,10 +185,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
             <div className="text-red-600 text-sm text-center">{error}</div>
           )}
 
-          {message && (
-            <div className="text-green-600 text-sm text-center">{message}</div>
-          )}
-
           <div>
             <button
               type="submit"
@@ -227,19 +194,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
               {loading ? 'Loading...' : mode === 'login' ? 'Sign in' : 'Sign up'}
             </button>
           </div>
-
-          {mode === 'login' && (
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={handleResendConfirmation}
-                disabled={resendingEmail}
-                className="text-sm text-purple-600 hover:text-purple-500 disabled:opacity-50"
-              >
-                {resendingEmail ? 'Sending...' : "Haven't confirmed your email? Resend confirmation"}
-              </button>
-            </div>
-          )}
 
           <div className="text-center">
             {mode === 'login' ? (
