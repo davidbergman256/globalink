@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { redirect } from 'next/navigation'
 import { User } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 async function getProfile() {
   const supabase = createSupabaseServerClient()
@@ -28,10 +29,12 @@ export default async function ProfilePage() {
           <div className="flex items-center space-x-6">
             <div className="flex-shrink-0">
               {profile?.avatar_url ? (
-                <img
+                <Image
                   className="h-24 w-24 rounded-full object-cover"
                   src={profile.avatar_url}
                   alt={profile.display_name || 'User'}
+                  width={96}
+                  height={96}
                 />
               ) : (
                 <div className="h-24 w-24 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { User } from 'lucide-react'
+import Image from 'next/image'
 import type { Profile } from '@/lib/types'
 
 type GroupCardProps = {
@@ -15,10 +16,12 @@ export default function GroupCard({ profile }: GroupCardProps) {
       <div className="flex items-center space-x-4">
         <div className="flex-shrink-0">
           {profile.avatar_url ? (
-            <img
+            <Image
               className="h-12 w-12 rounded-full object-cover"
               src={profile.avatar_url}
               alt={profile.display_name || 'User'}
+              width={48}
+              height={48}
             />
           ) : (
             <div className="h-12 w-12 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">

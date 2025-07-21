@@ -21,7 +21,7 @@ export default function ContactPage() {
                 Support & Questions
               </h2>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Have questions about globalink or need help with your account? We're here to help!
+                Have questions about globalink or need help with your account? We&apos;re here to help!
               </p>
               <a
                 href="mailto:globalink.supp@gmail.com"
