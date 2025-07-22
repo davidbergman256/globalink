@@ -1,23 +1,21 @@
 # globalink v0
 
-A minimal but production-ready web app for connecting group members with rich profiles, built for 1,000 MAU.
+A simplified meetup coordination platform for connecting strangers through organized events.
 
 ## Features
 
 - **Authentication**: Email/password sign-up and sign-in via Supabase Auth
-- **Groups**: Users are assigned to groups manually (MVP feature)
-- **Rich Profiles**: Display name, location, fun facts, and favorite topics
-- **Enhanced Signup**: Collect location, fun facts, and conversation topics during registration
-- **Group View**: See all members in your group with their interests
-- **Member Profiles**: View detailed profiles with personal information
-- **Discord Integration**: Direct link to Discord community
+- **Events**: Users are assigned to events for meetups (e.g., "Bouldering with John, Jacob, Jack & James")
+- **Simple Onboarding**: Collect basic info during registration
+- **Event Dashboard**: View your assigned event details
+- **Email Notifications**: Welcome email on signup
 - **Responsive Design**: Mobile-first UI with dark mode support
 
 ## Tech Stack
 
 - **Frontend**: Next.js 14 (App Router), TypeScript, React 18
-- **Styling**: Tailwind CSS + Headless UI
-- **Backend**: Supabase (PostgreSQL + Auth + Storage)
+- **Styling**: Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + Auth + Edge Functions)
 - **Icons**: Lucide React
 - **Deployment**: Vercel
 
@@ -25,10 +23,14 @@ A minimal but production-ready web app for connecting group members with rich pr
 
 ### Tables
 
-**groups**
+**events**
 ```sql
 id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 name TEXT
+activity TEXT
+date TIMESTAMPTZ
+location TEXT
+created_at TIMESTAMPTZ DEFAULT now()
 ```
 
 **profiles**
@@ -36,17 +38,12 @@ name TEXT
 id UUID PRIMARY KEY
 display_name TEXT UNIQUE
 avatar_url TEXT
-about TEXT
 location TEXT
 fun_fact TEXT
 talk_for_hours TEXT
-group_id UUID REFERENCES groups.id
+event_id UUID REFERENCES events.id
 created_at TIMESTAMPTZ DEFAULT now()
 ```
-
-### Storage
-
-**avatars** bucket for user profile pictures
 
 ## Setup Instructions
 
@@ -59,18 +56,20 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-Get these values from your Supabase project dashboard.
-
 ### 2. Supabase Setup
 
 1. Create a new Supabase project
 2. Run the following SQL to create the tables:
 
 ```sql
--- Create groups table
-CREATE TABLE groups (
+-- Create events table
+CREATE TABLE events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT
+  name TEXT NOT NULL,
+  activity TEXT NOT NULL,
+  date TIMESTAMPTZ,
+  location TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- Create profiles table
@@ -78,17 +77,16 @@ CREATE TABLE profiles (
   id UUID PRIMARY KEY,
   display_name TEXT UNIQUE,
   avatar_url TEXT,
-  about TEXT,
   location TEXT,
   fun_fact TEXT,
   talk_for_hours TEXT,
-  group_id UUID REFERENCES groups.id,
+  event_id UUID REFERENCES events.id,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- Enable Row Level Security
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 
 -- Create policies
 CREATE POLICY "Public profiles are viewable by everyone" ON profiles
@@ -100,45 +98,39 @@ CREATE POLICY "Users can insert their own profile" ON profiles
 CREATE POLICY "Users can update their own profile" ON profiles
   FOR UPDATE USING (auth.uid() = id);
 
--- Groups policies
-CREATE POLICY "Groups are viewable by everyone" ON groups
+-- Events policies
+CREATE POLICY "Events are viewable by everyone" ON events
   FOR SELECT USING (true);
 ```
 
-**If you have an existing profiles table, run this to add the new columns:**
-```sql
-ALTER TABLE profiles 
-ADD COLUMN location TEXT,
-ADD COLUMN fun_fact TEXT,
-ADD COLUMN talk_for_hours TEXT;
-```
+3. Set up Supabase Edge Function for welcome emails (optional):
+   - Create a new Edge Function named `send-welcome-email`
+   - Configure email service (Resend, SendGrid, etc.)
 
-3. Create an `avatars` storage bucket:
-   - Go to Storage in Supabase dashboard
-   - Create a new bucket named `avatars`
-   - Make it public
+### 3. Manual Event Assignment
 
-### 3. Manual Group Assignment (MVP)
+To assign users to events:
 
-To assign users to groups manually:
-
-1. Go to Supabase Dashboard → Table Editor → groups
-2. Insert a new group: `INSERT INTO groups (name) VALUES ('Group 1');`
+1. Go to Supabase Dashboard → Table Editor → events
+2. Insert a new event: 
+   ```sql
+   INSERT INTO events (name, activity, date, location) 
+   VALUES ('Bouldering Adventure', 'Bouldering', '2024-01-15 14:00:00', 'Brooklyn Boulders');
+   ```
 3. Go to profiles table
-4. Update user's group_id: `UPDATE profiles SET group_id = 'group-uuid-here' WHERE id = 'user-uuid-here';`
+4. Update user's event_id: 
+   ```sql
+   UPDATE profiles SET event_id = 'event-uuid-here' WHERE id = 'user-uuid-here';
+   ```
 
 ### 4. Installation & Development
 
 ```bash
 # Install dependencies
 npm install
-# or
-pnpm install
 
 # Run development server
 npm run dev
-# or
-pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
@@ -146,7 +138,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### 5. Deployment
 
 Deploy to Vercel:
-
 1. Push code to GitHub
 2. Connect repository to Vercel
 3. Add environment variables in Vercel dashboard
@@ -156,42 +147,26 @@ Deploy to Vercel:
 
 - `/join` - Sign-up page
 - `/login` - Sign-in page  
-- `/` - Home page (group members list)
-- `/profile` - Current user's profile
-- `/settings` - Profile editing with avatar upload
+- `/` - Home page (event dashboard)
 - `/contact` - Contact information
-- `/members/[id]` - Public profile of group mate
 
 ## Architecture
 
-- **Server Components**: Home, Profile, Member pages for optimal SEO and performance
+- **Server Components**: Home page for optimal SEO and performance
 - **Client Components**: Forms, interactive elements, auth state management
 - **Middleware**: Route protection for authenticated pages
-- **Storage**: Supabase Storage for avatar uploads
-- **State Management**: React Context for Supabase client
+- **Email**: Supabase Edge Functions for welcome emails
 
 ## Security
 
 - Row Level Security (RLS) enabled on all tables
 - Route protection via middleware
-- Group member access controls
-- Secure file uploads to Supabase Storage
+- Secure authentication via Supabase Auth
 
 ## Future Enhancements
 
-- Automated group assignment
-- Real-time messaging
-- Enhanced dark mode theming  
-- Push notifications
-- Advanced user matching algorithms
-
-## Contributing
-
-This is an MVP built in under 4 hours. For production use, consider:
-
-- Enhanced error handling
-- Loading states and skeletons
-- Form validation
-- Unit tests
-- Performance monitoring
-- Advanced security measures 
+- Automated event assignment algorithms
+- Real-time event updates
+- Enhanced email templates
+- Event feedback system
+- Mobile app (React Native) 
