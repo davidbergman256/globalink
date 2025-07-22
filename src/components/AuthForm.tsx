@@ -220,7 +220,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                       id="zipCode"
                       name="zipCode"
                       type="text"
-                      maxLength="10"
+                      maxLength={10}
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                     placeholder="e.g. 10001"
                     value={zipCode}
