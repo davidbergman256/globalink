@@ -12,89 +12,34 @@ export default function QuestionnairePage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [answers, setAnswers] = useState<Partial<QuestionnaireAnswers>>({})
-  const [authLoading, setAuthLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [authChecked, setAuthChecked] = useState(false)
 
-  // Better session handling - wait for auth state to be ready
+  // Simple auth check
   useEffect(() => {
-    let mounted = true
-    let retryCount = 0
-    const maxRetries = 5
-
-    const checkAuthWithRetry = async () => {
-      try {
-        console.log('Checking auth, attempt:', retryCount + 1)
-        
-        // Get current session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        
-        if (sessionError) {
-          console.error('Session error:', sessionError)
-          if (retryCount < maxRetries && mounted) {
-            retryCount++
-            setTimeout(checkAuthWithRetry, 1000) // Retry after 1 second
-            return
-          } else {
-            router.push('/login')
-            return
-          }
-        }
-
-        if (session?.user) {
-          console.log('Session found, user:', session.user.email)
-          setUser(session.user)
-          setAuthLoading(false)
-        } else {
-          console.log('No session found')
-          if (retryCount < maxRetries && mounted) {
-            retryCount++
-            setTimeout(checkAuthWithRetry, 1000) // Retry after 1 second
-            return
-          } else {
-            router.push('/login')
-          }
-        }
-      } catch (error) {
-        console.error('Auth check error:', error)
-        if (retryCount < maxRetries && mounted) {
-          retryCount++
-          setTimeout(checkAuthWithRetry, 1000)
-        } else {
-          router.push('/login')
-        }
-      }
-    }
-
-    // Start checking auth
-    checkAuthWithRetry()
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.email)
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
       
-      if (event === 'SIGNED_IN' && session?.user && mounted) {
+      if (session?.user) {
+        console.log('User found in questionnaire:', session.user.email)
         setUser(session.user)
-        setAuthLoading(false)
-      } else if (event === 'SIGNED_OUT' || !session) {
+      } else {
+        console.log('No user found, redirecting to login')
         router.push('/login')
+        return
       }
-    })
-
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
+      
+      setAuthChecked(true)
     }
+
+    checkAuth()
   }, [supabase, router])
 
-  // Don't render anything while checking auth
-  if (authLoading) {
+  // Don't render until auth is checked
+  if (!authChecked || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Setting up your account...</p>
-          <p className="text-gray-500 text-sm mt-2">This may take a few seconds</p>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
       </div>
     )
   }
@@ -124,11 +69,6 @@ export default function QuestionnairePage() {
   }
 
   const saveDraft = async (draftAnswers: Partial<QuestionnaireAnswers>) => {
-    if (!user) {
-      console.log('No user for saving draft')
-      return
-    }
-    
     try {
       console.log('Saving draft for user:', user.id)
       
@@ -159,20 +99,16 @@ export default function QuestionnairePage() {
       }
 
       if (existingProfile) {
-        const { error } = await supabase
+        await supabase
           .from('profiles')
           .update(profileData)
           .eq('user_id', user.id)
-        
-        if (error) console.error('Update error:', error)
-        else console.log('Profile updated successfully')
+        console.log('Profile updated')
       } else {
-        const { error } = await supabase
+        await supabase
           .from('profiles')
           .insert(profileData)
-        
-        if (error) console.error('Insert error:', error)
-        else console.log('Profile created successfully')
+        console.log('Profile created')
       }
     } catch (error) {
       console.error('Error saving draft:', error)
@@ -192,12 +128,6 @@ export default function QuestionnairePage() {
   }
 
   const handleSubmit = async () => {
-    if (!user) {
-      console.log('No user for submit')
-      router.push('/login')
-      return
-    }
-
     setLoading(true)
     
     try {
@@ -208,7 +138,7 @@ export default function QuestionnairePage() {
 
       console.log('Submitting questionnaire for user:', user.id)
       
-      // Final save with completion
+      // Final save
       await saveDraft(answers)
       
       console.log('Questionnaire completed, redirecting to dashboard')
@@ -334,189 +264,15 @@ export default function QuestionnairePage() {
           </div>
         )
 
-      // Branching questions for "Trying new foods"
-      case 6:
-        if (answers.activity === 'trying_foods') {
-          return (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">One dish you'd share?</h2>
-              <input
-                type="text"
-                placeholder="e.g. Pad Thai"
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-                value={answers.favorite_dish || ''}
-                onChange={(e) => handleAnswer('favorite_dish', e.target.value)}
-              />
-            </div>
-          )
-        }
-        // Skip if not food
-        setCurrentStep(prev => prev + 1)
-        return null
-
-      case 7:
-        if (answers.activity === 'trying_foods') {
-          return (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">Like spicy food?</h2>
-              <div className="space-y-3">
-                {[
-                  { value: true, label: 'Yes' },
-                  { value: false, label: 'No' }
-                ].map((option) => (
-                  <label key={option.value.toString()} className="flex items-center p-4 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="likes_spicy"
-                      value={option.value.toString()}
-                      checked={answers.likes_spicy === option.value}
-                      onChange={(e) => handleAnswer('likes_spicy', e.target.value === 'true')}
-                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-                    />
-                    <span className="ml-3 text-gray-900">{option.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )
-        } else if (answers.activity === 'gaming_online') {
-          return (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">What platform?</h2>
-              <div className="space-y-3">
-                {[
-                  { value: 'console', label: 'Console' },
-                  { value: 'pc', label: 'PC' },
-                  { value: 'mobile', label: 'Mobile' },
-                  { value: 'all', label: 'All' }
-                ].map((option) => (
-                  <label key={option.value} className="flex items-center p-4 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gaming_platform"
-                      value={option.value}
-                      checked={answers.gaming_platform === option.value}
-                      onChange={(e) => handleAnswer('gaming_platform', e.target.value)}
-                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-                    />
-                    <span className="ml-3 text-gray-900">{option.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )
-        }
-        setCurrentStep(prev => prev + 1)
-        return null
-
-      case 8:
-        if (answers.activity === 'gaming_online') {
-          return (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">Game you play most now?</h2>
-              <input
-                type="text"
-                placeholder="e.g. Valorant"
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-                value={answers.current_game || ''}
-                onChange={(e) => handleAnswer('current_game', e.target.value)}
-              />
-            </div>
-          )
-        } else if (answers.challenge === 'missing_home') {
-          return (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">Prefer friends...</h2>
-              <div className="space-y-3">
-                {[
-                  { value: 'same_culture', label: 'Same culture' },
-                  { value: 'different_culture', label: 'Different culture' },
-                  { value: 'doesnt_matter', label: "Doesn't matter" }
-                ].map((option) => (
-                  <label key={option.value} className="flex items-center p-4 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="cultural_pref"
-                      value={option.value}
-                      checked={answers.cultural_pref === option.value}
-                      onChange={(e) => handleAnswer('cultural_pref', e.target.value)}
-                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-                    />
-                    <span className="ml-3 text-gray-900">{option.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )
-        }
-        setCurrentStep(prev => prev + 1)
-        return null
-
-      // Optional questions
+      // Branching questions (simplified)
       default:
-        const optionalStep = currentStep - getCurrentBasicSteps()
-        
-        if (optionalStep === 1) {
-          return (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">Quick pick: Big party or small gathering?</h2>
-              <div className="space-y-3">
-                {[
-                  { value: 'big', label: 'Big' },
-                  { value: 'small', label: 'Small' }
-                ].map((option) => (
-                  <label key={option.value} className="flex items-center p-4 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="party_size"
-                      value={option.value}
-                      checked={answers.party_size === option.value}
-                      onChange={(e) => handleAnswer('party_size', e.target.value)}
-                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-                    />
-                    <span className="ml-3 text-gray-900">{option.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )
-        } else if (optionalStep === 2) {
-          return (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">Favourite study snack?</h2>
-              <input
-                type="text"
-                placeholder="e.g. Trail mix"
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-                value={answers.study_snack || ''}
-                onChange={(e) => handleAnswer('study_snack', e.target.value)}
-              />
-            </div>
-          )
-        } else if (optionalStep === 3) {
-          return (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900">Song on repeat?</h2>
-              <input
-                type="text"
-                placeholder="e.g. Bad Habit by Steve Lacy"
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-                value={answers.current_song || ''}
-                onChange={(e) => handleAnswer('current_song', e.target.value)}
-              />
-            </div>
-          )
-        }
-        return null
+        return (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-900">Almost done!</h2>
+            <p className="text-gray-600">Just a few more quick questions...</p>
+          </div>
+        )
     }
-  }
-
-  function getCurrentBasicSteps() {
-    let base = 5
-    if (answers.activity === 'trying_foods') base += 2
-    if (answers.activity === 'gaming_online') base += 2
-    if (answers.challenge === 'missing_home') base += 1
-    return base
   }
 
   const isCurrentStepValid = () => {
@@ -526,20 +282,11 @@ export default function QuestionnairePage() {
       case 3: return !!answers.personality
       case 4: return !!answers.challenge
       case 5: return !!answers.activity
-      case 6: return answers.activity !== 'trying_foods' || !!answers.favorite_dish
-      case 7: 
-        if (answers.activity === 'trying_foods') return answers.likes_spicy !== undefined
-        if (answers.activity === 'gaming_online') return !!answers.gaming_platform
-        return true
-      case 8:
-        if (answers.activity === 'gaming_online') return !!answers.current_game
-        if (answers.challenge === 'missing_home') return !!answers.cultural_pref
-        return true
-      default: return true // Optional questions
+      default: return true
     }
   }
 
-  const isLastStep = currentStep === totalSteps
+  const isLastStep = currentStep >= 5 // Simplified to 5 steps for now
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -548,13 +295,13 @@ export default function QuestionnairePage() {
           {/* Progress bar */}
           <div className="mb-8">
             <div className="flex justify-between text-sm text-gray-600 mb-2">
-              <span>Question {currentStep} of {totalSteps}</span>
-              <span>{Math.round((currentStep / totalSteps) * 100)}%</span>
+              <span>Question {currentStep} of 5</span>
+              <span>{Math.round((currentStep / 5) * 100)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
                 className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                style={{ width: `${(currentStep / 5) * 100}%` }}
               />
             </div>
           </div>

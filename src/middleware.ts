@@ -13,7 +13,7 @@ export async function middleware(req: NextRequest) {
 
   // Allow these routes without any checks
   const allowedRoutes = [
-    '/auth/callback',
+    '/auth/success',
     '/questionnaire',
     '/login', 
     '/join',
