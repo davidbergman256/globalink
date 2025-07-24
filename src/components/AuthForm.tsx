@@ -104,7 +104,7 @@ export default function AuthForm() {
           
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Enter your .edu email
+              Enter your email
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -117,19 +117,19 @@ export default function AuthForm() {
                 autoComplete="email"
                 required
                 className="block w-full pl-10 pr-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                placeholder="you@university.edu"
+                placeholder="your.email@university.edu"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <p className="mt-1 text-xs text-gray-500">
-              Only .edu email addresses are accepted
+              Student email addresses only
             </p>
           </div>
 
           <button
             type="submit"
-            disabled={loading || !email}
+            disabled={loading || !email || !isValidEmail(email)}
             className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
