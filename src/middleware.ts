@@ -11,8 +11,26 @@ export async function middleware(req: NextRequest) {
   // Refresh session if expired - required for Server Components
   const { data: { session } } = await supabase.auth.getSession()
 
-  // Protected routes
-  const protectedRoutes = ['/', '/contact']
+  // Allow these routes without any checks
+  const allowedRoutes = [
+    '/auth/callback',
+    '/questionnaire',
+    '/login', 
+    '/join',
+    '/_next',
+    '/favicon.ico'
+  ]
+  
+  const isAllowedRoute = allowedRoutes.some(route => 
+    req.nextUrl.pathname.startsWith(route)
+  )
+
+  if (isAllowedRoute) {
+    return res
+  }
+
+  // Protected routes that require authentication
+  const protectedRoutes = ['/', '/contact', '/admin', '/group', '/payment', '/rsvp', '/feedback']
   const isProtectedRoute = protectedRoutes.some(route => 
     req.nextUrl.pathname === route || req.nextUrl.pathname.startsWith(route + '/')
   )
@@ -21,13 +39,6 @@ export async function middleware(req: NextRequest) {
   if (!session && isProtectedRoute) {
     const redirectUrl = req.nextUrl.clone()
     redirectUrl.pathname = '/login'
-    return NextResponse.redirect(redirectUrl)
-  }
-
-  // If user is signed in and trying to access login/join pages
-  if (session && (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/join')) {
-    const redirectUrl = req.nextUrl.clone()
-    redirectUrl.pathname = '/'
     return NextResponse.redirect(redirectUrl)
   }
 
