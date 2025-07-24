@@ -11,8 +11,10 @@ export default function AuthForm() {
   const [error, setError] = useState('')
   const [emailSent, setEmailSent] = useState(false)
 
-  const isEduEmail = (email: string) => {
-    return email.endsWith('.edu')
+  const isValidEmail = (email: string) => {
+    // Allow .edu emails and specific test emails
+    const testEmails = ['bergmandavid24.7on@gmail.com', 'globalink.supp@gmail.com']
+    return email.endsWith('.edu') || testEmails.includes(email)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,8 +22,8 @@ export default function AuthForm() {
     setLoading(true)
     setError('')
 
-    // Validate .edu email
-    if (!isEduEmail(email)) {
+    // Validate email
+    if (!isValidEmail(email)) {
       setError('Please use your .edu email address')
       setLoading(false)
       return
@@ -57,7 +59,7 @@ export default function AuthForm() {
             <div className="bg-green-50 border border-green-200 rounded-md p-6">
               <CheckCircle className="mx-auto h-12 w-12 text-green-600 mb-4" />
               <h2 className="text-xl font-semibold text-green-900 mb-2">
-                Check your .edu inbox
+                Check your inbox
               </h2>
               <p className="text-green-700 text-sm">
                 We sent a magic link to <strong>{email}</strong>

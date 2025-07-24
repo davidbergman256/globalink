@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import AdminDashboard from '@/components/AdminDashboard'
 
 // Simple admin auth - in production you'd want proper admin roles
-const ADMIN_EMAILS = ['admin@globalink.com', 'david@globalink.com'] // Add your admin emails
+const ADMIN_EMAILS = ['globalink.supp@gmail.com'] // Updated admin email
 
 async function getAdminData() {
   const supabase = createSupabaseServerClient()
