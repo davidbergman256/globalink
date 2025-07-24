@@ -12,17 +12,68 @@ export default function QuestionnairePage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [answers, setAnswers] = useState<Partial<QuestionnaireAnswers>>({})
+  const [authLoading, setAuthLoading] = useState(true)
+  const [user, setUser] = useState<any>(null)
 
-  // Check if user is authenticated
+  // Check if user is authenticated with better session handling
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser()
+        
+        if (error) {
+          console.error('Auth error:', error)
+          router.push('/login')
+          return
+        }
+
+        if (!user) {
+          // Wait a bit and try again in case session is still loading
+          setTimeout(async () => {
+            const { data: { user: retryUser } } = await supabase.auth.getUser()
+            if (!retryUser) {
+              router.push('/login')
+            } else {
+              setUser(retryUser)
+              setAuthLoading(false)
+            }
+          }, 1000)
+        } else {
+          setUser(user)
+          setAuthLoading(false)
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error)
         router.push('/login')
       }
     }
+
     checkAuth()
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        router.push('/login')
+      } else if (session?.user) {
+        setUser(session.user)
+        setAuthLoading(false)
+      }
+    })
+
+    return () => subscription.unsubscribe()
   }, [supabase, router])
+
+  // Don't render anything while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   const totalSteps = getCurrentTotalSteps()
 
@@ -49,10 +100,9 @@ export default function QuestionnairePage() {
   }
 
   const saveDraft = async (draftAnswers: Partial<QuestionnaireAnswers>) => {
+    if (!user) return
+    
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
       // Check if profile exists
       const { data: existingProfile } = await supabase
         .from('profiles')
@@ -107,12 +157,14 @@ export default function QuestionnairePage() {
   }
 
   const handleSubmit = async () => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
     setLoading(true)
     
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('No user found')
-
       // Validate required fields
       if (!answers.from_location || !answers.current_location || !answers.personality || !answers.challenge || !answers.activity) {
         throw new Error('Please complete all required questions')
