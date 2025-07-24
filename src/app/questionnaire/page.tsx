@@ -15,52 +15,75 @@ export default function QuestionnairePage() {
   const [authLoading, setAuthLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
 
-  // Check if user is authenticated with better session handling
+  // Better session handling - wait for auth state to be ready
   useEffect(() => {
-    const checkAuth = async () => {
+    let mounted = true
+    let retryCount = 0
+    const maxRetries = 5
+
+    const checkAuthWithRetry = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser()
+        console.log('Checking auth, attempt:', retryCount + 1)
         
-        if (error) {
-          console.error('Auth error:', error)
-          router.push('/login')
-          return
+        // Get current session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError)
+          if (retryCount < maxRetries && mounted) {
+            retryCount++
+            setTimeout(checkAuthWithRetry, 1000) // Retry after 1 second
+            return
+          } else {
+            router.push('/login')
+            return
+          }
         }
 
-        if (!user) {
-          // Wait a bit and try again in case session is still loading
-          setTimeout(async () => {
-            const { data: { user: retryUser } } = await supabase.auth.getUser()
-            if (!retryUser) {
-              router.push('/login')
-            } else {
-              setUser(retryUser)
-              setAuthLoading(false)
-            }
-          }, 1000)
-        } else {
-          setUser(user)
+        if (session?.user) {
+          console.log('Session found, user:', session.user.email)
+          setUser(session.user)
           setAuthLoading(false)
+        } else {
+          console.log('No session found')
+          if (retryCount < maxRetries && mounted) {
+            retryCount++
+            setTimeout(checkAuthWithRetry, 1000) // Retry after 1 second
+            return
+          } else {
+            router.push('/login')
+          }
         }
       } catch (error) {
-        console.error('Auth check failed:', error)
-        router.push('/login')
+        console.error('Auth check error:', error)
+        if (retryCount < maxRetries && mounted) {
+          retryCount++
+          setTimeout(checkAuthWithRetry, 1000)
+        } else {
+          router.push('/login')
+        }
       }
     }
 
-    checkAuth()
+    // Start checking auth
+    checkAuthWithRetry()
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        router.push('/login')
-      } else if (session?.user) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session?.user?.email)
+      
+      if (event === 'SIGNED_IN' && session?.user && mounted) {
         setUser(session.user)
         setAuthLoading(false)
+      } else if (event === 'SIGNED_OUT' || !session) {
+        router.push('/login')
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [supabase, router])
 
   // Don't render anything while checking auth
@@ -69,7 +92,8 @@ export default function QuestionnairePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">Setting up your account...</p>
+          <p className="text-gray-500 text-sm mt-2">This may take a few seconds</p>
         </div>
       </div>
     )
@@ -100,9 +124,14 @@ export default function QuestionnairePage() {
   }
 
   const saveDraft = async (draftAnswers: Partial<QuestionnaireAnswers>) => {
-    if (!user) return
+    if (!user) {
+      console.log('No user for saving draft')
+      return
+    }
     
     try {
+      console.log('Saving draft for user:', user.id)
+      
       // Check if profile exists
       const { data: existingProfile } = await supabase
         .from('profiles')
@@ -130,14 +159,20 @@ export default function QuestionnairePage() {
       }
 
       if (existingProfile) {
-        await supabase
+        const { error } = await supabase
           .from('profiles')
           .update(profileData)
           .eq('user_id', user.id)
+        
+        if (error) console.error('Update error:', error)
+        else console.log('Profile updated successfully')
       } else {
-        await supabase
+        const { error } = await supabase
           .from('profiles')
           .insert(profileData)
+        
+        if (error) console.error('Insert error:', error)
+        else console.log('Profile created successfully')
       }
     } catch (error) {
       console.error('Error saving draft:', error)
@@ -158,6 +193,7 @@ export default function QuestionnairePage() {
 
   const handleSubmit = async () => {
     if (!user) {
+      console.log('No user for submit')
       router.push('/login')
       return
     }
@@ -170,8 +206,12 @@ export default function QuestionnairePage() {
         throw new Error('Please complete all required questions')
       }
 
+      console.log('Submitting questionnaire for user:', user.id)
+      
       // Final save with completion
       await saveDraft(answers)
+      
+      console.log('Questionnaire completed, redirecting to dashboard')
       
       // Redirect to dashboard
       router.push('/')
