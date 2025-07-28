@@ -11,7 +11,13 @@ type SupabaseContext = {
 const Context = createContext<SupabaseContext | undefined>(undefined)
 
 export default function SupabaseProvider({ children }: { children: React.ReactNode }) {
-  const [supabase] = useState(() => createSupabaseClient())
+  const [supabase] = useState(() => {
+    // Skip Supabase initialization during build time
+    if (typeof window === 'undefined' && !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      return null
+    }
+    return createSupabaseClient()
+  })
 
   useEffect(() => {
     const {

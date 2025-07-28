@@ -2,6 +2,8 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { redirect } from 'next/navigation'
 import AdminDashboard from '@/components/AdminDashboard'
 
+export const dynamic = 'force-dynamic'
+
 // Simple admin auth - in production you'd want proper admin roles
 const ADMIN_EMAILS = ['globalink.supp@gmail.com'] // Updated admin email
 

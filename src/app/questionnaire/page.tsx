@@ -422,11 +422,11 @@ export default function QuestionnairePage() {
                   </button>
                   
                   {/* Other input field */}
-                  {option.hasOther && answers[question.key] === option.value && (
+                  {'hasOther' in option && option.hasOther && answers[question.key] === option.value && (
                     <input
                       type="text"
-                      value={answers[option.otherKey as keyof QuestionnaireAnswers] || ''}
-                      onChange={(e) => handleAnswer(option.otherKey as keyof QuestionnaireAnswers, e.target.value)}
+                      value={('otherKey' in option && option.otherKey) ? String(answers[option.otherKey as keyof QuestionnaireAnswers] || '') : ''}
+                      onChange={(e) => ('otherKey' in option && option.otherKey) && handleAnswer(option.otherKey as keyof QuestionnaireAnswers, e.target.value)}
                       placeholder="Please specify..."
                                              className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md focus:ring-[#698a7b] focus:border-[#698a7b]"
                       autoFocus

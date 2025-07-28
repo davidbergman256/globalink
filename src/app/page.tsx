@@ -2,6 +2,8 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { redirect } from 'next/navigation'
 import Dashboard from '@/components/Dashboard'
 
+export const dynamic = 'force-dynamic'
+
 async function getUserData() {
   const supabase = createSupabaseServerClient()
   
