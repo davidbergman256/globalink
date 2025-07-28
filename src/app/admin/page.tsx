@@ -26,6 +26,30 @@ async function getAdminData() {
     .select('*')
     .in('user_id', queueUserIds)
 
+  // Get user emails and display names using the admin function
+  let userEmails: Record<string, string> = {}
+  let userDisplayNames: Record<string, string> = {}
+  
+  if (queueUserIds.length > 0) {
+    const { data: userEmailData } = await supabase
+      .rpc('get_user_emails_for_admin', { user_ids: queueUserIds })
+    
+    if (userEmailData) {
+      userEmailData.forEach(user => {
+        userEmails[user.user_id] = user.email
+        userDisplayNames[user.user_id] = user.display_name || `User ${user.user_id.slice(0, 8)}`
+      })
+    }
+  }
+  
+  // Fallback for any missing data
+  queueUserIds.forEach(userId => {
+    if (!userDisplayNames[userId]) {
+      const profile = profiles?.find(p => p.user_id === userId)
+      userDisplayNames[userId] = profile?.display_name || `User ${userId.slice(0, 8)}`
+    }
+  })
+
   // Get all active groups
   const { data: activeGroups } = await supabase
     .from('groups')
@@ -34,10 +58,16 @@ async function getAdminData() {
     .order('created_at', { ascending: false })
 
   return {
-    user,
+    user: {
+      id: user.id,
+      email: user.email!, // Safe to assert since we checked it exists in ADMIN_EMAILS
+      created_at: user.created_at
+    },
     queueEntries: queueEntries || [],
     profiles: profiles || [],
-    activeGroups: activeGroups || []
+    activeGroups: activeGroups || [],
+    userEmails,
+    userDisplayNames
   }
 }
 

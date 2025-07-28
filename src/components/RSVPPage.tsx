@@ -16,13 +16,15 @@ export default function RSVPPage({ user, group, existingRsvp, response }: RSVPPa
 
   const formatDateTime = (datetime: string) => {
     const date = new Date(datetime)
-    return date.toLocaleDateString('en-US', { 
+    const options: Intl.DateTimeFormatOptions = {
       weekday: 'long', 
       month: 'long', 
       day: 'numeric',
       hour: 'numeric',
-      minute: '2-digit'
-    })
+      minute: '2-digit',
+      timeZone: 'UTC'
+    }
+    return new Intl.DateTimeFormat('en-US', options).format(date)
   }
 
   const currentResponse = response || existingRsvp?.answer
@@ -58,7 +60,7 @@ export default function RSVPPage({ user, group, existingRsvp, response }: RSVPPa
 
           {currentResponse === 'yes' && (
             <p className="text-gray-600 mb-8">
-              We're excited to see you at the meetup. You should receive reminder emails before the event.
+              We&apos;re excited to see you at the meetup. You should receive reminder emails before the event.
             </p>
           )}
 
@@ -99,14 +101,14 @@ export default function RSVPPage({ user, group, existingRsvp, response }: RSVPPa
                   onClick={() => router.push(`/rsvp/${group.id}?response=yes`)}
                   className="w-full bg-green-600 text-white py-3 px-4 rounded-md font-medium hover:bg-green-700"
                 >
-                  ✅ I'll be there
+                  ✅ I&apos;ll be there
                 </button>
                 
                 <button
                   onClick={() => router.push(`/rsvp/${group.id}?response=no`)}
                   className="w-full bg-red-600 text-white py-3 px-4 rounded-md font-medium hover:bg-red-700"
                 >
-                  ❌ Can't make it
+                  ❌ Can&apos;t make it
                 </button>
               </div>
             </div>
@@ -115,7 +117,7 @@ export default function RSVPPage({ user, group, existingRsvp, response }: RSVPPa
           <div className="mt-8">
             <button
               onClick={() => router.push(`/group/${group.id}`)}
-              className="text-purple-600 hover:text-purple-500 font-medium"
+              className="text-[#698a7b] hover:text-[#5a7a6b] font-medium"
             >
               ← Back to group details
             </button>

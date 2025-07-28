@@ -11,9 +11,11 @@ DROP TABLE IF EXISTS profiles CASCADE;
 -- Create new profiles table (1-1 with users)
 CREATE TABLE profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  display_name TEXT NOT NULL,
   age INTEGER,
   tags TEXT[] DEFAULT '{}', -- max 3 tags
   personality TEXT CHECK (personality IN ('outgoing', 'shy_at_first', 'somewhere_in_between')),
+  challenge TEXT CHECK (challenge IN ('language_barriers', 'missing_home', 'finding_interests', 'other')),
   pref_activity TEXT CHECK (pref_activity IN ('studying_together', 'exploring_city', 'gaming_online', 'trying_foods', 'other')),
   -- Branching fields stored as JSON
   branches JSONB DEFAULT '{}',
@@ -95,6 +97,8 @@ CREATE POLICY "Users can delete their queue entry" ON queue FOR DELETE USING (au
 
 -- Create policies for groups
 CREATE POLICY "Users can view groups they're in" ON groups FOR SELECT USING (auth.uid() = ANY(member_ids));
+CREATE POLICY "Authenticated users can create groups" ON groups FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "Authenticated users can update groups" ON groups FOR UPDATE USING (auth.uid() IS NOT NULL);
 
 -- Create policies for payments
 CREATE POLICY "Users can view their own payments" ON payments FOR SELECT USING (auth.uid() = user_id);
@@ -129,7 +133,11 @@ CREATE INDEX idx_payments_status ON payments(status);
 
 -- Create functions for common operations
 CREATE OR REPLACE FUNCTION get_user_current_group(p_user_id UUID)
-RETURNS TABLE(group_id UUID, status TEXT, event_datetime TIMESTAMPTZ, venue_name TEXT, venue_address TEXT) AS $$
+RETURNS TABLE(group_id UUID, status TEXT, event_datetime TIMESTAMPTZ, venue_name TEXT, venue_address TEXT) 
+LANGUAGE plpgsql 
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   RETURN QUERY
   SELECT g.id, g.status, g.event_datetime, g.venue_name, g.venue_address
@@ -139,10 +147,14 @@ BEGIN
   ORDER BY g.created_at DESC
   LIMIT 1;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 CREATE OR REPLACE FUNCTION get_user_payment_status(p_user_id UUID, p_group_id UUID)
-RETURNS TEXT AS $$
+RETURNS TEXT 
+LANGUAGE plpgsql 
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
   payment_status TEXT;
 BEGIN
@@ -152,4 +164,28 @@ BEGIN
   
   RETURN COALESCE(payment_status, 'unpaid');
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER; 
+$$;
+
+-- Function to get user emails for admin use (only accessible by admins)
+CREATE OR REPLACE FUNCTION get_user_emails_for_admin(user_ids UUID[])
+RETURNS TABLE(user_id UUID, email TEXT, display_name TEXT)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  -- Check if current user is admin
+  IF NOT (auth.email() = ANY(ARRAY['globalink.supp@gmail.com'])) THEN
+    RAISE EXCEPTION 'Access denied: Admin only function';
+  END IF;
+
+  RETURN QUERY
+  SELECT 
+    p.user_id,
+    u.email,
+    p.display_name
+  FROM profiles p
+  JOIN auth.users u ON u.id = p.user_id
+  WHERE p.user_id = ANY(user_ids);
+END;
+$$; 

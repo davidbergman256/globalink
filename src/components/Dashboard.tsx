@@ -13,6 +13,7 @@ interface DashboardProps {
   currentGroup: Group | null
   paymentStatus: 'unpaid' | 'paid' | 'refunded' | null
   pastGroups: Group[]
+  feedbackStatus?: string[]
 }
 
 export default function Dashboard({ 
@@ -21,7 +22,8 @@ export default function Dashboard({
   queueEntry, 
   currentGroup, 
   paymentStatus, 
-  pastGroups 
+  pastGroups,
+  feedbackStatus = [] 
 }: DashboardProps) {
   const { supabase } = useSupabase()
   const router = useRouter()
@@ -76,13 +78,15 @@ export default function Dashboard({
 
   const formatDateTime = (datetime: string) => {
     const date = new Date(datetime)
-    return date.toLocaleDateString('en-US', { 
+    const options: Intl.DateTimeFormatOptions = {
       weekday: 'long', 
       month: 'long', 
       day: 'numeric',
       hour: 'numeric',
-      minute: '2-digit'
-    })
+      minute: '2-digit',
+      timeZone: 'UTC'
+    }
+    return new Intl.DateTimeFormat('en-US', options).format(date)
   }
 
   const getStatusBadge = (status: string) => {
@@ -177,7 +181,7 @@ export default function Dashboard({
             {paymentStatus === 'paid' && currentGroup.status === 'location_revealed' && (
               <button
                 onClick={() => router.push(`/group/${currentGroup.id}`)}
-                className="w-full bg-purple-600 text-white py-3 px-4 rounded-md font-medium hover:bg-purple-700"
+                className="w-full bg-[#698a7b] text-white py-3 px-4 rounded-md font-medium hover:bg-[#5a7a6b]"
               >
                 View Details
               </button>
@@ -191,38 +195,38 @@ export default function Dashboard({
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           {queueEntry ? (
             <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="h-8 w-8 text-purple-600" />
+              <div className="w-16 h-16 bg-[#f0f4f2] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="h-8 w-8 text-[#698a7b]" />
               </div>
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
                 Looking for the other four
               </h2>
               <p className="text-gray-600 mb-6">
-                We're finding awesome people for you to meet. This usually takes less than 24 hours.
+                We&apos;re finding awesome people for you to meet. This usually takes less than 24 hours.
               </p>
               <button
                 onClick={handleLeaveQueue}
                 disabled={loading}
-                className="text-purple-600 hover:text-purple-500 text-sm font-medium"
+                className="text-[#698a7b] hover:text-[#7a9d8c] text-sm font-medium"
               >
                 Leave queue
               </button>
             </div>
           ) : (
             <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="h-8 w-8 text-purple-600" />
+              <div className="w-16 h-16 bg-[#f0f4f2] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-[#698a7b]" />
               </div>
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
                 Ready to meet your crew?
               </h2>
               <p className="text-gray-600 mb-6">
-                We'll match you with 4 other students for an amazing experience
+                We&apos;ll match you with 4 other students for an amazing experience
               </p>
               <button
                 onClick={handleJoinQueue}
                 disabled={loading}
-                className="bg-purple-600 text-white px-8 py-3 rounded-md font-medium hover:bg-purple-700 disabled:opacity-50 inline-flex items-center"
+                className="bg-[#698a7b] text-white px-8 py-3 rounded-md font-medium hover:bg-[#5a7a6b] disabled:opacity-50 inline-flex items-center"
               >
                 {loading ? (
                   <>
@@ -243,29 +247,45 @@ export default function Dashboard({
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">History</h2>
           <div className="space-y-4">
-            {pastGroups.map((group) => (
-              <div key={group.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-md">
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="font-medium text-gray-900">
-                      Crew of {group.member_ids.length}
-                    </span>
-                    {getStatusBadge(group.status)}
+            {pastGroups.map((group) => {
+              const needsFeedback = group.status === 'completed' && !feedbackStatus?.includes(group.id)
+              
+              return (
+                <div key={group.id} className="p-4 bg-gray-50 rounded-md">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium text-gray-900">
+                          {group.venue_name || `Crew of ${group.member_ids.length}`}
+                        </span>
+                        {getStatusBadge(group.status)}
+                      </div>
+                      {group.event_datetime && (
+                        <p className="text-sm text-gray-600 mt-1">
+                          {formatDateTime(group.event_datetime)}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex space-x-2">
+                      {needsFeedback && (
+                        <button
+                          onClick={() => router.push(`/feedback/${group.id}`)}
+                          className="bg-[#698a7b] text-white px-3 py-1 rounded text-sm font-medium hover:bg-[#5a7a6b]"
+                        >
+                          Give Feedback
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => router.push(`/group/${group.id}`)}
+                        className="text-[#698a7b] hover:text-[#7a9d8c] text-sm font-medium"
+                      >
+                        View
+                      </button>
+                    </div>
                   </div>
-                  {group.event_datetime && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      {formatDateTime(group.event_datetime)}
-                    </p>
-                  )}
                 </div>
-                <button 
-                  onClick={() => router.push(`/group/${group.id}`)}
-                  className="text-purple-600 hover:text-purple-500 text-sm font-medium"
-                >
-                  View
-                </button>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
@@ -280,7 +300,7 @@ export default function Dashboard({
             Your adventure starts here
           </h3>
           <p className="text-gray-600">
-            Click "Find my crew" to get matched with other students
+            Click &quot;Find my crew&quot; to get matched with other students
           </p>
         </div>
       )}

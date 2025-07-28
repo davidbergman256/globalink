@@ -43,23 +43,29 @@ export default function GroupDetail({
 
   const formatDateTime = (datetime: string) => {
     const date = new Date(datetime)
+    const fullOptions: Intl.DateTimeFormatOptions = {
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: 'UTC'
+    }
+    const dateOptions: Intl.DateTimeFormatOptions = {
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric',
+      timeZone: 'UTC'
+    }
+    const timeOptions: Intl.DateTimeFormatOptions = {
+      hour: 'numeric', 
+      minute: '2-digit',
+      timeZone: 'UTC'
+    }
     return {
-      full: date.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        month: 'long', 
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit'
-      }),
-      date: date.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        month: 'long', 
-        day: 'numeric'
-      }),
-      time: date.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit'
-      })
+      full: new Intl.DateTimeFormat('en-US', fullOptions).format(date),
+      date: new Intl.DateTimeFormat('en-US', dateOptions).format(date),
+      time: new Intl.DateTimeFormat('en-US', timeOptions).format(date)
     }
   }
 
@@ -175,7 +181,7 @@ export default function GroupDetail({
           <CheckCircle className="h-10 w-10 text-green-600" />
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          You're set!
+          You&apos;re set!
         </h1>
         <p className="text-gray-600">
           Your crew is ready to meet
@@ -197,8 +203,8 @@ export default function GroupDetail({
             )}
 
             {group.event_datetime && (
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-                <div className="flex items-center justify-center text-purple-800">
+                          <div className="bg-green-50 border border-[#698a7b] rounded-lg p-4 mb-6">
+              <div className="flex items-center justify-center text-[#4a6256]">
                   <Calendar className="h-5 w-5 mr-2" />
                   <span className="font-medium">
                     {formatDateTime(group.event_datetime).full}
@@ -210,7 +216,7 @@ export default function GroupDetail({
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={generateCalendarFile}
-                className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                className="inline-flex items-center px-4 py-2 bg-[#698a7b] text-white rounded-md hover:bg-[#5a7a6b]"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Add to Calendar
@@ -219,7 +225,7 @@ export default function GroupDetail({
               <button
                 onClick={sendReminderEmail}
                 disabled={sendingReminder}
-                className="inline-flex items-center px-4 py-2 border border-purple-600 text-purple-600 rounded-md hover:bg-purple-50 disabled:opacity-50"
+                className="inline-flex items-center px-4 py-2 border border-[#698a7b] text-[#698a7b] rounded-md hover:bg-green-50 disabled:opacity-50"
               >
                 <Mail className="h-4 w-4 mr-2" />
                 {sendingReminder ? 'Sending...' : 'Add reminder'}
@@ -239,7 +245,7 @@ export default function GroupDetail({
             {sharedTags.map((tag, index) => (
               <span
                 key={index}
-                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800"
+                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-[#4a6256]"
               >
                 <Tag className="h-3 w-3 mr-1" />
                 {tag}
@@ -263,23 +269,23 @@ export default function GroupDetail({
             return (
               <div key={member.user_id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                    <UserIcon className="h-5 w-5 text-purple-600" />
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <UserIcon className="h-5 w-5 text-[#698a7b]" />
                   </div>
                   <div>
                     <div className="flex items-center space-x-2">
                       <span className="font-medium text-gray-900">
-                        {memberEmail?.email?.split('@')[0] || 'Member'}
+                        {isCurrentUser ? 'You' : `${memberEmail?.email?.split('@')[0] || member.user_id?.slice(0, 8)}`}
                         {member.age && ` (${member.age})`}
-                        {isCurrentUser && (
-                          <span className="text-purple-600 text-sm ml-1">(you)</span>
-                        )}
                       </span>
                     </div>
                     <div className="flex items-center space-x-4 mt-1">
                       {member.personality && (
-                        <span className="text-xs text-gray-500 capitalize">
-                          {member.personality.replace('_', ' ')}
+                        <span className="text-xs text-gray-500">
+                          {member.personality === 'somewhere_in_between' 
+                            ? 'Somewhere in between' 
+                            : member.personality.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+                          }
                         </span>
                       )}
                       {member.from_location && (
@@ -302,7 +308,7 @@ export default function GroupDetail({
                   {rsvpStatus === 'no' && (
                     <div className="flex items-center text-red-600">
                       <XCircle className="h-4 w-4 mr-1" />
-                      <span className="text-xs">Can't make it</span>
+                      <span className="text-xs">Can&apos;t make it</span>
                     </div>
                   )}
                   {rsvpStatus === 'pending' && (
@@ -333,7 +339,7 @@ export default function GroupDetail({
                   : 'border border-green-600 text-green-600 hover:bg-green-50'
               }`}
             >
-              ✅ I'll be there
+              ✅ I&apos;ll be there
             </button>
             <button
               onClick={() => router.push(`/rsvp/${group.id}?response=no`)}
@@ -343,7 +349,7 @@ export default function GroupDetail({
                   : 'border border-red-600 text-red-600 hover:bg-red-50'
               }`}
             >
-              ❌ Can't make it
+              ❌ Can&apos;t make it
             </button>
           </div>
           {currentUserRsvp && (

@@ -6,7 +6,7 @@ export default function ContactPage() {
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
         <div className="px-6 py-8">
           <div className="text-center">
-            <Mail className="mx-auto h-12 w-12 text-purple-600" />
+            <Mail className="mx-auto h-12 w-12 text-[#698a7b]" />
             <h1 className="mt-4 text-3xl font-bold text-gray-900 dark:text-white">
               Contact Us
             </h1>
@@ -25,7 +25,7 @@ export default function ContactPage() {
               </p>
               <a
                 href="mailto:globalink.supp@gmail.com"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-[#698a7b] hover:bg-[#5a7a6b] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#698a7b]"
               >
                 <Mail className="w-5 h-5 mr-2" />
                 globalink.supp@gmail.com

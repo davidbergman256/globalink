@@ -3,6 +3,7 @@
 import { useSupabase } from './SupabaseProvider'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { LogOut, Menu, X } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
@@ -36,7 +37,7 @@ export default function Navbar() {
 
   const getLinkClassName = (path: string) => {
     const baseClasses = "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-    const activeClasses = "text-purple-600 dark:text-purple-400 font-semibold"
+    const activeClasses = "text-[#698a7b] dark:text-[#698a7b] font-semibold"
     return pathname === path ? `${baseClasses} ${activeClasses}` : baseClasses
   }
 
@@ -45,8 +46,14 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-gray-900 dark:text-white">
-              globalink
+            <Link href="/" className="flex items-center">
+              <Image 
+                src="/logo.png" 
+                alt="Globalink" 
+                width={120} 
+                height={40}
+                className="h-8 w-auto"
+              />
             </Link>
           </div>
 

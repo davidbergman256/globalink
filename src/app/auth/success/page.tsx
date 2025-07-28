@@ -64,7 +64,7 @@ export default function AuthSuccess() {
       <div className="text-center">
         {status === 'checking' && (
           <>
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#698a7b] mx-auto mb-4"></div>
             <p className="text-gray-600">Completing your sign in...</p>
           </>
         )}

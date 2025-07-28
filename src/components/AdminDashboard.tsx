@@ -20,13 +20,17 @@ interface AdminDashboardProps {
   queueEntries: QueueEntry[]
   profiles: Profile[]
   activeGroups: Group[]
+  userEmails: Record<string, string>
+  userDisplayNames: Record<string, string>
 }
 
 export default function AdminDashboard({ 
   user, 
   queueEntries, 
   profiles,
-  activeGroups 
+  activeGroups,
+  userEmails,
+  userDisplayNames 
 }: AdminDashboardProps) {
   const { supabase } = useSupabase()
   const router = useRouter()
@@ -134,7 +138,8 @@ export default function AdminDashboard({
   }
 
   const formatDateTime = (datetime: string) => {
-    return new Date(datetime).toLocaleString()
+    const date = new Date(datetime)
+    return date.toISOString().slice(0, 16).replace('T', ' ')
   }
 
   return (
@@ -155,7 +160,7 @@ export default function AdminDashboard({
             <h2 className="text-xl font-semibold text-gray-900">
               Queue ({queueEntries.length} users)
             </h2>
-            <Users className="h-6 w-6 text-purple-600" />
+            <Users className="h-6 w-6 text-[#698a7b]" />
           </div>
 
           {queueEntries.length === 0 ? (
@@ -174,7 +179,7 @@ export default function AdminDashboard({
                     onClick={() => handleUserSelect(entry.user_id)}
                     className={`p-4 border rounded-lg cursor-pointer transition-colors ${
                       isSelected 
-                        ? 'border-purple-500 bg-purple-50' 
+                        ? 'border-[#698a7b] bg-[#f0f4f2]' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -182,22 +187,30 @@ export default function AdminDashboard({
                       <div>
                         <div className="flex items-center space-x-2">
                           <span className="font-medium text-gray-900">
-                            User {entry.user_id.slice(0, 8)}
+                            {userDisplayNames[entry.user_id] || `User ${entry.user_id.slice(0, 8)}`}
                           </span>
+                          {userEmails[entry.user_id] && (
+                            <span className="text-xs text-gray-500">
+                              ({userEmails[entry.user_id]})
+                            </span>
+                          )}
                           {profile?.age && (
                             <span className="text-sm text-gray-500">
                               ({profile.age})
                             </span>
                           )}
                           {isSelected && (
-                            <UserCheck className="h-4 w-4 text-purple-600" />
+                            <UserCheck className="h-4 w-4 text-[#698a7b]" />
                           )}
                         </div>
                         <div className="text-sm text-gray-600 mt-1">
                           <span>{profile?.current_location || 'Unknown location'}</span>
                           {profile?.personality && (
-                            <span className="ml-2 capitalize">
-                              • {profile.personality.replace('_', ' ')}
+                            <span className="ml-2">
+                              • {profile.personality === 'somewhere_in_between' 
+                                  ? 'Somewhere in between' 
+                                  : profile.personality.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+                                }
                             </span>
                           )}
                         </div>
@@ -213,12 +226,12 @@ export default function AdminDashboard({
           )}
 
           {selectedUsers.length > 0 && (
-            <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-              <p className="text-purple-800 font-medium">
+            <div className="mt-6 p-4 bg-[#f0f4f2] border border-[#7a9d8c] rounded-lg">
+              <p className="text-[#3e5249] font-medium">
                 {selectedUsers.length} users selected
               </p>
-              <p className="text-purple-600 text-sm">
-                Click "Create Group" to form a crew
+              <p className="text-[#698a7b] text-sm">
+                Click &quot;Create Group&quot; to form a crew
               </p>
             </div>
           )}
@@ -230,7 +243,7 @@ export default function AdminDashboard({
             <h2 className="text-xl font-semibold text-gray-900">
               Create Group
             </h2>
-            <Plus className="h-6 w-6 text-purple-600" />
+            <Plus className="h-6 w-6 text-[#698a7b]" />
           </div>
 
           <form className="space-y-4">
@@ -242,7 +255,7 @@ export default function AdminDashboard({
                 type="datetime-local"
                 value={groupForm.event_datetime}
                 onChange={(e) => setGroupForm(prev => ({ ...prev, event_datetime: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#698a7b] focus:border-[#698a7b]"
               />
             </div>
 
@@ -255,7 +268,7 @@ export default function AdminDashboard({
                 placeholder="e.g. Brooklyn Boulders"
                 value={groupForm.venue_name}
                 onChange={(e) => setGroupForm(prev => ({ ...prev, venue_name: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#698a7b] focus:border-[#698a7b]"
               />
             </div>
 
@@ -268,7 +281,7 @@ export default function AdminDashboard({
                 placeholder="Full address"
                 value={groupForm.venue_address}
                 onChange={(e) => setGroupForm(prev => ({ ...prev, venue_address: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#698a7b] focus:border-[#698a7b]"
               />
             </div>
 
@@ -281,7 +294,7 @@ export default function AdminDashboard({
                 placeholder="e.g. Boston, MA"
                 value={groupForm.campus}
                 onChange={(e) => setGroupForm(prev => ({ ...prev, campus: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#698a7b] focus:border-[#698a7b]"
               />
             </div>
 
@@ -289,7 +302,7 @@ export default function AdminDashboard({
               type="button"
               onClick={createGroup}
               disabled={creating || selectedUsers.length === 0}
-              className="w-full bg-purple-600 text-white py-3 px-4 rounded-md font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#698a7b] text-white py-3 px-4 rounded-md font-medium hover:bg-[#5a7a6b] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {creating ? 'Creating...' : `Create Group (${selectedUsers.length} users)`}
             </button>
@@ -338,9 +351,17 @@ export default function AdminDashboard({
                         Reveal Location
                       </button>
                     )}
+                    {group.status === 'location_revealed' && (
+                      <button
+                        onClick={() => updateGroupStatus(group.id, 'completed')}
+                        className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                      >
+                        Mark Complete
+                      </button>
+                    )}
                     <button
                       onClick={() => router.push(`/group/${group.id}`)}
-                      className="px-3 py-1 border border-purple-600 text-purple-600 text-sm rounded hover:bg-purple-50"
+                      className="px-3 py-1 border border-[#698a7b] text-[#698a7b] text-sm rounded hover:bg-[#f0f4f2]"
                     >
                       View
                     </button>

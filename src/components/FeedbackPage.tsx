@@ -105,7 +105,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
           </p>
           <button
             onClick={() => router.push('/')}
-            className="bg-purple-600 text-white px-6 py-3 rounded-md font-medium hover:bg-purple-700"
+                            className="bg-[#698a7b] text-white px-6 py-3 rounded-md font-medium hover:bg-[#5a7a6b]"
           >
             Back to Dashboard
           </button>
@@ -134,7 +134,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
               <div
                 key={s}
                 className={`h-2 w-8 rounded-full ${
-                  s <= step ? 'bg-purple-600' : 'bg-gray-200'
+                  s <= step ? 'bg-[#698a7b]' : 'bg-gray-200'
                 }`}
               />
             ))}
@@ -146,7 +146,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
           {step === 1 && (
             <div className="text-center">
               <div className="mb-6">
-                <Star className="h-16 w-16 text-purple-600 mx-auto mb-4" />
+                <Star className="h-16 w-16 text-[#698a7b] mx-auto mb-4" />
                 <h2 className="text-2xl font-semibold text-gray-900 mb-2">
                   How was the crew?
                 </h2>
@@ -165,7 +165,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
           {step === 2 && (
             <div className="text-center">
               <div className="mb-8">
-                <Heart className="h-16 w-16 text-purple-600 mx-auto mb-4" />
+                <Heart className="h-16 w-16 text-[#698a7b] mx-auto mb-4" />
                 <h2 className="text-2xl font-semibold text-gray-900 mb-2">
                   Would meet again?
                 </h2>
@@ -198,7 +198,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
           {step === 3 && (
             <div className="text-center">
               <div className="mb-6">
-                <MessageCircle className="h-16 w-16 text-purple-600 mx-auto mb-4" />
+                <MessageCircle className="h-16 w-16 text-[#698a7b] mx-auto mb-4" />
                 <h2 className="text-2xl font-semibold text-gray-900 mb-2">
                   Any thoughts?
                 </h2>
@@ -212,7 +212,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
                 onChange={(e) => handleCommentChange(e.target.value)}
                 maxLength={140}
                 placeholder="Your thoughts... (optional)"
-                className="w-full p-4 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500 resize-none"
+                className="w-full p-4 border border-gray-300 rounded-md focus:ring-[#698a7b] focus:border-[#698a7b] resize-none"
                 rows={4}
               />
               
@@ -226,7 +226,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="w-full bg-purple-600 text-white py-3 px-4 rounded-md font-medium hover:bg-purple-700 disabled:opacity-50"
+                  className="w-full bg-[#698a7b] text-white py-3 px-4 rounded-md font-medium hover:bg-[#5a7a6b] disabled:opacity-50"
                 >
                   {loading ? 'Submitting...' : 'Submit Feedback'}
                 </button>
@@ -270,7 +270,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">Comment</h3>
                     <p className="text-gray-600 bg-gray-50 p-4 rounded-md">
-                      "{feedback.comment}"
+                      &quot;{feedback.comment}&quot;
                     </p>
                   </div>
                 )}
@@ -278,7 +278,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
               
               <button
                 onClick={() => router.push('/')}
-                className="mt-8 text-purple-600 hover:text-purple-500 font-medium"
+                className="mt-8 text-[#698a7b] hover:text-[#5a7a6b] font-medium"
               >
                 ← Back to Dashboard
               </button>

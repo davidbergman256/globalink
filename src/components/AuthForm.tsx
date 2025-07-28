@@ -13,7 +13,12 @@ export default function AuthForm() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  const testEmails = ['bergmandavid24.7on@gmail.com', 'globalink.supp@gmail.com']
+  const testEmails = [
+    'bergmandavid24.7on@gmail.com', 
+    'globalink.supp@gmail.com',
+    'alphatester7902@gmail.com',
+    'alphatester7900@gmail.com'
+  ]
   
   const isValidEmail = (email: string) => {
     return email.endsWith('.edu') || testEmails.includes(email)
@@ -70,7 +75,7 @@ export default function AuthForm() {
           </p>
           <button
             onClick={() => setSuccess(false)}
-            className="mt-4 text-purple-600 hover:text-purple-500 text-sm"
+                          className="mt-4 text-[#698a7b] hover:text-[#7a9d8c] text-sm"
           >
             Try different email
           </button>
@@ -103,7 +108,7 @@ export default function AuthForm() {
               <input
                 type="email"
                 required
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:ring-[#698a7b] focus:border-[#698a7b]"
                 placeholder="your.email@university.edu"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -115,7 +120,7 @@ export default function AuthForm() {
           <button
             type="submit"
             disabled={loading || !email || !isValidEmail(email)}
-            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#698a7b] hover:bg-[#5a7a6b] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#698a7b] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <>

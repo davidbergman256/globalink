@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSupabase } from '@/components/SupabaseProvider'
-import { ArrowRight, ArrowLeft } from 'lucide-react'
+import { ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react'
 import type { QuestionnaireAnswers } from '@/lib/types'
 
 export default function QuestionnairePage() {
@@ -39,307 +39,476 @@ export default function QuestionnairePage() {
   if (!authChecked || !user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#698a7b]"></div>
       </div>
     )
   }
 
-  const totalSteps = getCurrentTotalSteps()
+  const getTotalSteps = () => {
+    let steps = 6 // Core questions
 
-  function getCurrentTotalSteps() {
-    let base = 5 // Base questions 1-5
-    
-    if (answers.activity === 'trying_foods') base += 2 // Q6a, Q6b
-    if (answers.activity === 'gaming_online') base += 2 // Q7a, Q7b
-    if (answers.challenge === 'missing_home') base += 1 // Q8
-    
-    // Optional questions
-    if (currentStep > base) {
-      return base + 3 // Add optional questions
-    }
-    return base
+    // Add branching questions
+    if (answers.activity === 'trying_foods') steps += 2 // Q6, Q7
+    if (answers.activity === 'gaming_online') steps += 2 // Q8, Q9
+    if (answers.challenge === 'missing_home') steps += 1 // Q10
+
+    // Add optional questions
+    steps += 2 // Q11, Q12
+
+    return steps
   }
 
   const handleAnswer = (key: keyof QuestionnaireAnswers, value: any) => {
-    const newAnswers = { ...answers, [key]: value }
-    setAnswers(newAnswers)
+    setAnswers(prev => ({ ...prev, [key]: value }))
+  }
+
+  const nextStep = () => {
+    const totalSteps = getTotalSteps()
     
-    // Auto-save draft
-    saveDraft(newAnswers)
-  }
-
-  const saveDraft = async (draftAnswers: Partial<QuestionnaireAnswers>) => {
-    try {
-      console.log('Saving draft for user:', user.id)
-      
-      // Check if profile exists
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .eq('user_id', user.id)
-        .single()
-
-      const profileData = {
-        user_id: user.id,
-        from_location: draftAnswers.from_location || null,
-        current_location: draftAnswers.current_location || null,
-        personality: draftAnswers.personality || null,
-        pref_activity: draftAnswers.activity || null,
-        branches: {
-          challenge: draftAnswers.challenge,
-          favorite_dish: draftAnswers.favorite_dish,
-          likes_spicy: draftAnswers.likes_spicy,
-          gaming_platform: draftAnswers.gaming_platform,
-          current_game: draftAnswers.current_game,
-          cultural_pref: draftAnswers.cultural_pref,
-          party_size: draftAnswers.party_size,
-          study_snack: draftAnswers.study_snack,
-          current_song: draftAnswers.current_song
-        }
-      }
-
-      if (existingProfile) {
-        await supabase
-          .from('profiles')
-          .update(profileData)
-          .eq('user_id', user.id)
-        console.log('Profile updated')
-      } else {
-        await supabase
-          .from('profiles')
-          .insert(profileData)
-        console.log('Profile created')
-      }
-    } catch (error) {
-      console.error('Error saving draft:', error)
-    }
-  }
-
-  const handleNext = () => {
     if (currentStep < totalSteps) {
       setCurrentStep(prev => prev + 1)
+    } else {
+      submitQuestionnaire()
     }
   }
 
-  const handleBack = () => {
+  const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(prev => prev - 1)
     }
   }
 
-  const handleSubmit = async () => {
+  const skipToOptional = () => {
+    // Skip to first optional question
+    let skipTo = 6 // After core questions
+    
+    if (answers.activity === 'trying_foods') skipTo += 2
+    if (answers.activity === 'gaming_online') skipTo += 2
+    if (answers.challenge === 'missing_home') skipTo += 1
+    
+    setCurrentStep(skipTo + 1)
+  }
+
+  const submitQuestionnaire = async () => {
     setLoading(true)
     
     try {
       // Validate required fields
-      if (!answers.from_location || !answers.current_location || !answers.personality || !answers.challenge || !answers.activity) {
+      if (!answers.display_name || !answers.from_location || !answers.current_location || !answers.personality || !answers.challenge || !answers.activity) {
         throw new Error('Please complete all required questions')
       }
 
-      console.log('Submitting questionnaire for user:', user.id)
+      // Save complete profile
+      const profileData = {
+        user_id: user.id,
+        display_name: answers.display_name.trim(),
+        from_location: answers.from_location.trim(),
+        current_location: answers.current_location.trim(),
+        personality: answers.personality,
+        challenge: answers.challenge,
+        pref_activity: answers.activity,
+        branches: {
+          challenge_other: answers.challenge_other?.trim() || null,
+          activity_other: answers.activity_other?.trim() || null,
+          favorite_dish: answers.favorite_dish?.trim() || null,
+          likes_spicy: answers.likes_spicy,
+          gaming_platform: answers.gaming_platform || null,
+          current_game: answers.current_game?.trim() || null,
+          cultural_pref: answers.cultural_pref || null,
+          study_snack: answers.study_snack?.trim() || null,
+          current_song: answers.current_song?.trim() || null
+        }
+      }
+
+      console.log('Submitting profile data:', profileData)
+
+      // Upsert profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert(profileData, { onConflict: 'user_id' })
+
+      if (profileError) {
+        console.error('Profile error:', profileError)
+        throw new Error(`Failed to save profile: ${profileError.message}`)
+      }
+
+      // Immediately add to queue for matching (reduce churn)
+      const campus = answers.current_location.trim()
       
-      // Final save
-      await saveDraft(answers)
+      console.log('Adding user to queue with campus:', campus)
       
-      console.log('Questionnaire completed, redirecting to dashboard')
-      
-      // Redirect to dashboard
+      const { error: queueError } = await supabase
+        .from('queue')
+        .upsert({
+          user_id: user.id,
+          campus: campus
+        }, { onConflict: 'user_id' })
+
+      if (queueError) {
+        console.error('Queue error:', queueError)
+        // Don't fail the entire process if queue insertion fails
+        console.warn('Failed to add to queue, but profile was saved successfully')
+      }
+
+      console.log('Questionnaire completed successfully, redirecting to dashboard')
       router.push('/')
+
     } catch (error: any) {
       console.error('Error submitting questionnaire:', error)
-      alert(error.message)
+      alert(`Error completing questionnaire: ${error.message || 'Please try again.'}`)
     } finally {
       setLoading(false)
     }
   }
 
-  const renderQuestion = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Where are you originally from?</h2>
-            <input
-              type="text"
-              placeholder="e.g. Prague, Czech Republic"
-              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-              value={answers.from_location || ''}
-              onChange={(e) => handleAnswer('from_location', e.target.value)}
-            />
-          </div>
-        )
+  const getCurrentQuestion = () => {
+    const coreQuestions = 6
+    let branchingStart = coreQuestions
 
-      case 2:
-        return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Where do you live now?</h2>
-            <input
-              type="text"
-              placeholder="e.g. Boston, MA"
-              className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
-              value={answers.current_location || ''}
-              onChange={(e) => handleAnswer('current_location', e.target.value)}
-            />
-          </div>
-        )
+    // Core questions (1-5)
+    if (currentStep <= coreQuestions) {
+      switch (currentStep) {
+        case 1:
+          return {
+            title: "What should we call you?",
+            type: "text" as const,
+            key: "display_name" as const,
+            placeholder: "e.g., Alex, Sam, Jordan..."
+          }
 
-      case 3:
-        return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Which best describes you?</h2>
-            <div className="space-y-3">
-              {[
-                { value: 'outgoing', label: 'Outgoing' },
-                { value: 'shy_at_first', label: 'Shy at first' },
-                { value: 'somewhere_in_between', label: 'Somewhere in between' }
-              ].map((option) => (
-                <label key={option.value} className="flex items-center p-4 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="personality"
-                    value={option.value}
-                    checked={answers.personality === option.value}
-                    onChange={(e) => handleAnswer('personality', e.target.value)}
-                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-                  />
-                  <span className="ml-3 text-gray-900">{option.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )
+        case 2:
+          return {
+            title: "Where are you originally from?",
+            type: "text" as const,
+            key: "from_location" as const,
+            placeholder: "e.g., Tokyo, Japan"
+          }
 
-      case 4:
-        return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Hardest part about making friends here?</h2>
-            <div className="space-y-3">
-              {[
-                { value: 'language_barriers', label: 'Language barriers' },
-                { value: 'missing_home', label: 'Missing home' },
-                { value: 'finding_interests', label: 'Finding similar interests' },
-                { value: 'other', label: 'Other' }
-              ].map((option) => (
-                <label key={option.value} className="flex items-center p-4 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="challenge"
-                    value={option.value}
-                    checked={answers.challenge === option.value}
-                    onChange={(e) => handleAnswer('challenge', e.target.value)}
-                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-                  />
-                  <span className="ml-3 text-gray-900">{option.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )
+        case 3:
+          return {
+            title: "Where do you live now?",
+            type: "text" as const,
+            key: "current_location" as const,
+            placeholder: "e.g., Boston, MA"
+          }
 
-      case 5:
-        return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">How do you like to hang out?</h2>
-            <div className="space-y-3">
-              {[
-                { value: 'studying_together', label: 'Studying together' },
-                { value: 'exploring_city', label: 'Exploring the city' },
-                { value: 'gaming_online', label: 'Playing games online' },
-                { value: 'trying_foods', label: 'Trying new foods' },
-                { value: 'other', label: 'Other' }
-              ].map((option) => (
-                <label key={option.value} className="flex items-center p-4 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="activity"
-                    value={option.value}
-                    checked={answers.activity === option.value}
-                    onChange={(e) => handleAnswer('activity', e.target.value)}
-                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-                  />
-                  <span className="ml-3 text-gray-900">{option.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )
+        case 4:
+          return {
+            title: "Would you describe yourself as:",
+            type: "choice" as const,
+            key: "personality" as const,
+            options: [
+              { value: "outgoing", label: "Outgoing (love meeting new people)" },
+              { value: "shy_at_first", label: "Shy at first (but warm up later)" },
+              { value: "somewhere_in_between", label: "Somewhere in between" }
+            ]
+          }
 
-      // Branching questions (simplified)
-      default:
-        return (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Almost done!</h2>
-            <p className="text-gray-600">Just a few more quick questions...</p>
-          </div>
-        )
+        case 5:
+          return {
+            title: "What's been the hardest part about making friends here?",
+            type: "choice" as const,
+            key: "challenge" as const,
+            options: [
+              { value: "language_barriers", label: "Language barriers" },
+              { value: "missing_home", label: "Missing home" },
+              { value: "finding_interests", label: "Finding people with similar interests" },
+              { value: "other", label: "Other", hasOther: true, otherKey: "challenge_other" }
+            ]
+          }
+
+        case 6:
+          return {
+            title: "How do you prefer to spend time with friends?",
+            type: "choice" as const,
+            key: "activity" as const,
+            options: [
+              { value: "studying_together", label: "Studying together" },
+              { value: "exploring_city", label: "Exploring the city" },
+              { value: "gaming_online", label: "Playing games online" },
+              { value: "trying_foods", label: "Trying new foods" },
+              { value: "other", label: "Other", hasOther: true, otherKey: "activity_other" }
+            ]
+          }
+      }
     }
+
+    // Branching questions
+    let branchStep = currentStep - coreQuestions
+
+    // Food branching (if chose "trying_foods")
+    if (answers.activity === 'trying_foods') {
+      if (branchStep === 1) {
+        return {
+          title: "What's one dish from your country you'd love to share?",
+          type: "text" as const,
+          key: "favorite_dish" as const,
+          placeholder: "e.g., Ramen, Tacos, Pierogi..."
+        }
+      }
+      if (branchStep === 2) {
+        return {
+          title: "Do you like spicy food?",
+          type: "choice" as const,
+          key: "likes_spicy" as const,
+          options: [
+            { value: true, label: "Yes, bring on the heat! 🌶️" },
+            { value: false, label: "No, I prefer mild flavors" }
+          ]
+        }
+      }
+      branchStep -= 2
+    }
+
+    // Gaming branching (if chose "gaming_online")
+    if (answers.activity === 'gaming_online') {
+      if (branchStep === 1) {
+        return {
+          title: "Do you play on:",
+          type: "choice" as const,
+          key: "gaming_platform" as const,
+          options: [
+            { value: "console", label: "Console (PS5, Xbox, Nintendo)" },
+            { value: "pc", label: "PC" },
+            { value: "mobile", label: "Mobile" },
+            { value: "all", label: "All of the above" }
+          ]
+        }
+      }
+      if (branchStep === 2) {
+        return {
+          title: "What game are you playing most right now?",
+          type: "text" as const,
+          key: "current_game" as const,
+          placeholder: "e.g., League of Legends, Valorant, Among Us..."
+        }
+      }
+      branchStep -= 2
+    }
+
+    // Cultural preference branching (if answered "missing_home")
+    if (answers.challenge === 'missing_home') {
+      if (branchStep === 1) {
+        return {
+          title: "Would you prefer friends:",
+          type: "choice" as const,
+          key: "cultural_pref" as const,
+          options: [
+            { value: "same_culture", label: "From similar cultural backgrounds" },
+            { value: "different_culture", label: "From completely different cultures" },
+            { value: "doesnt_matter", label: "Doesn't matter" }
+          ]
+        }
+      }
+      branchStep -= 1
+    }
+
+    // Optional questions
+    const optionalStart = branchStep
+    if (optionalStart === 1) {
+      return {
+        title: "What's your favourite study snack?",
+        type: "text" as const,
+        key: "study_snack" as const,
+        placeholder: "e.g., Coffee and cookies, Trail mix, Bubble tea...",
+        optional: true
+      }
+    }
+
+    if (optionalStart === 2) {
+      return {
+        title: "Share a song you've been listening to a lot lately!",
+        type: "text" as const,
+        key: "current_song" as const,
+        placeholder: "e.g., Artist - Song Title",
+        optional: true
+      }
+    }
+
+    return null
   }
 
-  const isCurrentStepValid = () => {
-    switch (currentStep) {
-      case 1: return !!answers.from_location
-      case 2: return !!answers.current_location
-      case 3: return !!answers.personality
-      case 4: return !!answers.challenge
-      case 5: return !!answers.activity
-      default: return true
-    }
+  const question = getCurrentQuestion()
+  const totalSteps = getTotalSteps()
+  const progress = (currentStep / totalSteps) * 100
+
+  if (!question) {
+    return <div>Error: Invalid question step</div>
   }
 
-  const isLastStep = currentStep >= 5 // Simplified to 5 steps for now
+  const canGoNext = () => {
+    if (question.optional) return true
+    
+    const value = answers[question.key]
+    if (question.type === "text") {
+      return value && value.toString().trim().length > 0
+    }
+    return value !== undefined && value !== null
+  }
+
+  const isOptionalSection = question.optional
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          {/* Progress bar */}
-          <div className="mb-8">
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
-              <span>Question {currentStep} of 5</span>
-              <span>{Math.round((currentStep / 5) * 100)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${(currentStep / 5) * 100}%` }}
-              />
-            </div>
+      <div className="max-w-2xl mx-auto">
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <span>Question {currentStep} of {totalSteps}</span>
+            <span>{Math.round(progress)}% complete</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-[#698a7b] h-2 rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Optional Section Header */}
+        {isOptionalSection && currentStep === getTotalSteps() - 2 && (
+                     <div className="text-center mb-8 p-4 bg-[#f0f4f2] border border-[#7a9d8c] rounded-lg">
+                         <h3 className="text-lg font-medium text-[#3e5249] mb-2">
+               🎉 Almost done! Fun questions ahead
+             </h3>
+             <p className="text-[#5a7a6b] text-sm">
+              These last few questions help us match you better, but feel free to skip any!
+            </p>
+          </div>
+        )}
+
+        {/* Question Card */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {question.title}
+            </h2>
+            {question.optional && (
+              <p className="text-sm text-gray-500">Optional question - feel free to skip!</p>
+            )}
           </div>
 
-          {/* Question */}
-          {renderQuestion()}
+          {question.type === "text" && (
+            <div className="mb-6">
+              <input
+                type="text"
+                value={answers[question.key] || ''}
+                onChange={(e) => handleAnswer(question.key, e.target.value)}
+                placeholder={question.placeholder}
+                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#698a7b] focus:border-[#698a7b] text-lg"
+                autoFocus
+              />
+            </div>
+          )}
+
+          {question.type === "choice" && (
+            <div className="space-y-3 mb-6">
+              {question.options?.map((option) => (
+                <div key={option.value.toString()}>
+                  <button
+                    onClick={() => handleAnswer(question.key, option.value)}
+                    className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                      answers[question.key] === option.value
+                        ? 'border-[#698a7b] bg-[#f0f4f2] text-[#3e5249]'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>{option.label}</span>
+                                             {answers[question.key] === option.value && (
+                         <CheckCircle className="h-5 w-5 text-[#698a7b]" />
+                       )}
+                    </div>
+                  </button>
+                  
+                  {/* Other input field */}
+                  {option.hasOther && answers[question.key] === option.value && (
+                    <input
+                      type="text"
+                      value={answers[option.otherKey as keyof QuestionnaireAnswers] || ''}
+                      onChange={(e) => handleAnswer(option.otherKey as keyof QuestionnaireAnswers, e.target.value)}
+                      placeholder="Please specify..."
+                                             className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md focus:ring-[#698a7b] focus:border-[#698a7b]"
+                      autoFocus
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Navigation */}
-          <div className="flex justify-between mt-8">
+          <div className="flex justify-between items-center">
             <button
-              onClick={handleBack}
+              onClick={prevStep}
               disabled={currentStep === 1}
-              className="flex items-center px-4 py-2 text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed hover:text-gray-800"
+              className={`flex items-center px-4 py-2 rounded-md font-medium ${
+                currentStep === 1
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </button>
 
-            {isLastStep ? (
+            <div className="flex space-x-3">
+              {/* Skip button for optional questions */}
+              {isOptionalSection && currentStep < totalSteps && (
+                <button
+                  onClick={nextStep}
+                  className="px-6 py-2 text-gray-600 hover:text-gray-900 font-medium"
+                >
+                  Skip
+                </button>
+              )}
+
+              {/* Skip to optional section */}
+              {!isOptionalSection && currentStep === 6 && (
+                                 <button
+                   onClick={skipToOptional}
+                   className="px-6 py-2 text-[#698a7b] hover:text-[#5a7a6b] font-medium"
+                 >
+                   Skip branching →
+                 </button>
+              )}
+
               <button
-                onClick={handleSubmit}
-                disabled={!isCurrentStepValid() || loading}
-                className="flex items-center px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={nextStep}
+                disabled={!canGoNext() || loading}
+                className={`flex items-center px-6 py-2 rounded-md font-medium ${
+                                     !canGoNext() || loading
+                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                     : 'bg-[#698a7b] text-white hover:bg-[#5a7a6b]'
+                }`}
               >
-                {loading ? 'Saving...' : 'Find my crew'}
-                {!loading && <ArrowRight className="h-4 w-4 ml-2" />}
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Finishing...
+                  </>
+                ) : currentStep === totalSteps ? (
+                  'Complete & Find My Crew!'
+                ) : (
+                  <>
+                    Next
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </>
+                )}
               </button>
-            ) : (
-              <button
-                onClick={handleNext}
-                disabled={!isCurrentStepValid()}
-                className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Next
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </button>
-            )}
+            </div>
           </div>
+        </div>
+
+        {/* Helper text */}
+        <div className="text-center mt-6 text-sm text-gray-500">
+          {currentStep === totalSteps ? (
+            "🎉 Ready to find your crew! We'll add you to the matching queue right away."
+          ) : isOptionalSection ? (
+            "These questions help us make better matches - but they're totally optional!"
+          ) : (
+            "Help us find the perfect people for you to meet"
+          )}
         </div>
       </div>
     </div>

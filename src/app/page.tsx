@@ -6,7 +6,11 @@ async function getUserData() {
   const supabase = createSupabaseServerClient()
   
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  
+  // Middleware ensures we have a user here
+  if (!user) {
+    redirect('/login')
+  }
 
   // Check if user has completed profile
   const { data: profile } = await supabase
@@ -55,18 +59,35 @@ async function getUserData() {
     .in('status', ['completed', 'cancelled'])
     .order('created_at', { ascending: false })
 
+  // Check feedback status for completed groups
+  let feedbackStatus = []
+  if (pastGroups && pastGroups.length > 0) {
+    const { data: existingFeedback } = await supabase
+      .from('feedback')
+      .select('group_id')
+      .eq('user_id', user.id)
+    
+    feedbackStatus = existingFeedback?.map(f => f.group_id) || []
+  }
+
   return {
-    user,
+    user: {
+      id: user.id,
+      email: user.email!, // Safe to assert since we checked user exists
+      created_at: user.created_at
+    },
     profile,
     queueEntry,
     currentGroup,
     paymentStatus,
-    pastGroups: pastGroups || []
+    pastGroups: pastGroups || [],
+    feedbackStatus
   }
 }
 
 export default async function HomePage() {
   const data = await getUserData()
 
+  // Show dashboard for authenticated users
   return <Dashboard {...data} />
 } 

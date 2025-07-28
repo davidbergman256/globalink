@@ -1,188 +1,186 @@
 'use client'
 
 import { useState } from 'react'
-import { useSupabase } from './SupabaseProvider'
 import { useRouter } from 'next/navigation'
-import { CreditCard, Shield, ArrowLeft, AlertCircle } from 'lucide-react'
-import type { User, Group } from '@/lib/types'
+import { CreditCard, Users, Calendar, MapPin, ArrowLeft, Loader2 } from 'lucide-react'
+import { getStripe } from '@/lib/stripe'
+import type { User, Group, Profile } from '@/lib/types'
 
 interface PaymentPageProps {
   user: User
   group: Group
+  members: Partial<Profile>[]
 }
 
-export default function PaymentPage({ user, group }: PaymentPageProps) {
-  const { supabase } = useSupabase()
+export default function PaymentPage({ user, group, members }: PaymentPageProps) {
   const router = useRouter()
-  const [processing, setProcessing] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const formatDateTime = (datetime: string) => {
     const date = new Date(datetime)
-    return date.toLocaleDateString('en-US', { 
+    const options: Intl.DateTimeFormatOptions = {
       weekday: 'long', 
       month: 'long', 
       day: 'numeric',
       hour: 'numeric',
-      minute: '2-digit'
-    })
+      minute: '2-digit',
+      timeZone: 'UTC'
+    }
+    return new Intl.DateTimeFormat('en-US', options).format(date)
   }
 
-  // Simulate payment for now - replace with actual Stripe integration
   const handlePayment = async () => {
-    setProcessing(true)
+    setLoading(true)
     setError('')
 
     try {
-      // Simulate payment processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Create checkout session
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          groupId: group.id,
+        }),
+      })
 
-      // Create payment record
-      const { error: paymentError } = await supabase
-        .from('payments')
-        .insert({
-          group_id: group.id,
-          user_id: user.id,
-          status: 'paid',
-          stripe_session_id: 'mock_session_' + Date.now(),
-          amount_cents: 800
-        })
+      const data = await response.json()
 
-      if (paymentError) throw paymentError
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout session')
+      }
 
-      // Update group status to location_revealed if all members have paid
-      // For now, we'll just update it immediately for demo purposes
-      const { error: groupError } = await supabase
-        .from('groups')
-        .update({ status: 'location_revealed' })
-        .eq('id', group.id)
+      // Redirect to Stripe Checkout
+      const stripe = await getStripe()
+      if (!stripe) {
+        throw new Error('Stripe failed to load')
+      }
 
-      if (groupError) throw groupError
+      const { error: stripeError } = await stripe.redirectToCheckout({
+        sessionId: data.sessionId,
+      })
 
-      // Redirect to group page
-      router.push(`/group/${group.id}`)
-
+      if (stripeError) {
+        throw new Error(stripeError.message)
+      }
     } catch (error: any) {
-      console.error('Error processing payment:', error)
-      setError('Payment failed. Please try again.')
+      console.error('Payment error:', error)
+      setError(error.message || 'Something went wrong. Please try again.')
     } finally {
-      setProcessing(false)
+      setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CreditCard className="h-8 w-8 text-purple-600" />
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="flex items-center text-[#698a7b] hover:text-[#5a7a6b] mb-8"
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to group
+      </button>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {/* Header */}
+        <div className="bg-[#698a7b] px-6 py-8">
+          <div className="text-center">
+            <CreditCard className="mx-auto h-12 w-12 text-white mb-4" />
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Secure Your Spot
+            </h1>
+            <p className="text-green-100">
+              $8.00 refundable deposit
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Reserve Your Spot
-          </h1>
-          <p className="text-gray-600">
-            $8 refundable deposit to confirm attendance
-          </p>
         </div>
 
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
-              <p className="text-red-800 text-sm">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Event Details */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Event Details</h2>
+        {/* Group Details */}
+        <div className="px-6 py-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Event Details
+          </h2>
           
           <div className="space-y-3">
-            <div>
-              <span className="text-sm font-medium text-gray-500">Venue</span>
-              <p className="text-gray-900">{group.venue_name}</p>
-            </div>
-            
-            {group.event_datetime && (
-              <div>
-                <span className="text-sm font-medium text-gray-500">Date & Time</span>
-                <p className="text-gray-900">{formatDateTime(group.event_datetime)}</p>
+            {group.venue_name && (
+              <div className="flex items-center text-gray-600">
+                <MapPin className="h-5 w-5 mr-3 flex-shrink-0" />
+                <span>{group.venue_name}</span>
               </div>
             )}
             
-            <div>
-              <span className="text-sm font-medium text-gray-500">Group Size</span>
-              <p className="text-gray-900">{group.member_ids.length} members</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Payment Info */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment</h2>
-          
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Deposit</span>
-              <span className="font-semibold text-gray-900">$8.00</span>
-            </div>
-            <div className="flex justify-between items-center text-lg font-semibold">
-              <span className="text-gray-900">Total</span>
-              <span className="text-gray-900">$8.00</span>
-            </div>
-          </div>
-
-          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-            <div className="flex items-start">
-              <Shield className="h-5 w-5 text-green-600 mr-2 mt-0.5" />
-              <div className="text-sm text-green-800">
-                <p className="font-medium">100% Refundable</p>
-                <p>Get your money back if the event is cancelled or you can't attend.</p>
+            {group.event_datetime && (
+              <div className="flex items-center text-gray-600">
+                <Calendar className="h-5 w-5 mr-3 flex-shrink-0" />
+                <span>{formatDateTime(group.event_datetime)}</span>
               </div>
+            )}
+            
+            <div className="flex items-center text-gray-600">
+              <Users className="h-5 w-5 mr-3 flex-shrink-0" />
+              <span>{group.member_ids.length} members in your crew</span>
             </div>
           </div>
         </div>
 
-        {/* Stripe Integration Notice */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
-          <div className="flex">
-            <AlertCircle className="h-5 w-5 text-yellow-600 mr-2" />
-            <div className="text-sm text-yellow-800">
-              <p className="font-medium">Demo Mode</p>
-              <p>This is a simulated payment. In production, this would integrate with Stripe for secure payment processing.</p>
+        {/* Payment Details */}
+        <div className="px-6 py-6 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Payment Summary
+          </h2>
+          
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-gray-600">Meetup deposit</span>
+              <span className="font-medium">$8.00</span>
             </div>
+            <div className="flex justify-between items-center text-lg font-semibold border-t border-gray-200 pt-2">
+              <span>Total</span>
+              <span>$8.00</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              * This deposit is fully refundable if you attend the meetup
+            </p>
           </div>
         </div>
 
-        {/* Payment Button */}
-        <button
-          onClick={handlePayment}
-          disabled={processing}
-          className="w-full bg-purple-600 text-white py-4 px-6 rounded-md font-semibold text-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
-        >
-          {processing ? (
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Processing...
+        {/* Payment Action */}
+        <div className="px-6 py-6">
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-red-800 text-sm">{error}</p>
             </div>
-          ) : (
-            'Reserve with $8 (refundable)'
           )}
-        </button>
-
-        <button
-          onClick={() => router.push('/')}
-          className="w-full flex items-center justify-center text-gray-600 hover:text-gray-800"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </button>
-
-        {/* Security Info */}
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>Secure payment processing powered by Stripe</p>
-          <p>Your payment information is encrypted and secure</p>
+          
+          <button
+            onClick={handlePayment}
+            disabled={loading}
+            className="w-full bg-[#698a7b] text-white py-4 px-6 rounded-lg font-medium hover:bg-[#5a7a6b] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <CreditCard className="h-5 w-5 mr-2" />
+                Pay with Stripe
+              </>
+            )}
+          </button>
+          
+          <div className="mt-4 text-center">
+            <p className="text-xs text-gray-500">
+              Secure payment powered by Stripe
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Your payment information is encrypted and secure
+            </p>
+          </div>
         </div>
       </div>
     </div>

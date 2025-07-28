@@ -41,14 +41,15 @@ async function getGroupData(groupId: string) {
   // Get member profiles
   const { data: members } = await supabase
     .from('profiles')
-    .select('user_id, age, personality, pref_activity, from_location')
+    .select('user_id, display_name, age, personality, pref_activity, from_location')
     .in('user_id', group.member_ids)
 
-  // Get member emails from auth.users (for contact purposes)
-  const { data: userEmails } = await supabase
-    .from('auth.users')
-    .select('id, email')
-    .in('id', group.member_ids)
+  // Get display names for members
+  const userEmails = group.member_ids.map(id => {
+    const member = members?.find(m => m.user_id === id)
+    const displayName = member?.display_name || `User ${id.slice(0, 8)}`
+    return { id, email: `${displayName}@globalink.app` }
+  })
 
   // Get RSVP data
   const { data: rsvps } = await supabase
@@ -57,7 +58,11 @@ async function getGroupData(groupId: string) {
     .eq('group_id', groupId)
 
   return {
-    user,
+    user: {
+      id: user.id,
+      email: user.email!, // Safe to assert since we checked user exists
+      created_at: user.created_at
+    },
     group,
     paymentStatus,
     members: members || [],

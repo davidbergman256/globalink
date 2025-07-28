@@ -8,9 +8,11 @@ export interface User {
 
 export interface Profile {
   user_id: string
+  display_name?: string | null
   age: number | null
   tags: string[] // max 3
   personality: 'outgoing' | 'shy_at_first' | 'somewhere_in_between' | null
+  challenge: 'language_barriers' | 'missing_home' | 'finding_interests' | 'other' | null
   pref_activity: 'studying_together' | 'exploring_city' | 'gaming_online' | 'trying_foods' | 'other' | null
   branches: Record<string, any> // JSON for branching questionnaire responses
   from_location: string | null
@@ -63,19 +65,24 @@ export interface Feedback {
 
 // Questionnaire types
 export interface QuestionnaireAnswers {
+  // Core questions (1-6)
+  display_name: string
   from_location: string
   current_location: string
   personality: 'outgoing' | 'shy_at_first' | 'somewhere_in_between'
   challenge: 'language_barriers' | 'missing_home' | 'finding_interests' | 'other'
+  challenge_other?: string // If "other" is selected
   activity: 'studying_together' | 'exploring_city' | 'gaming_online' | 'trying_foods' | 'other'
+  activity_other?: string // If "other" is selected
   
-  // Branching questions
-  favorite_dish?: string
-  likes_spicy?: boolean
-  gaming_platform?: 'console' | 'pc' | 'mobile' | 'all'
-  current_game?: string
-  cultural_pref?: 'same_culture' | 'different_culture' | 'doesnt_matter'
-  party_size?: 'big' | 'small'
+  // Branching questions (6-10)
+  favorite_dish?: string // If chose "trying_foods"
+  likes_spicy?: boolean // If chose "trying_foods"
+  gaming_platform?: 'console' | 'pc' | 'mobile' | 'all' // If chose "gaming_online"
+  current_game?: string // If chose "gaming_online"
+  cultural_pref?: 'same_culture' | 'different_culture' | 'doesnt_matter' // If answered "missing_home"
+  
+  // Optional fun questions (11-12)
   study_snack?: string
   current_song?: string
 }

@@ -53,7 +53,11 @@ async function getRSVPData(groupId: string, response: 'yes' | 'no' | undefined) 
     .single()
 
   return {
-    user,
+    user: {
+      id: user.id,
+      email: user.email!, // Safe to assert since we checked user exists
+      created_at: user.created_at
+    },
     group,
     existingRsvp,
     response

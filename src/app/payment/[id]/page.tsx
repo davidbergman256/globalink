@@ -42,7 +42,11 @@ async function getPaymentData(groupId: string) {
   }
 
   return {
-    user,
+    user: {
+      id: user.id,
+      email: user.email!, // Safe to assert since we checked user exists
+      created_at: user.created_at
+    },
     group
   }
 }
@@ -50,5 +54,5 @@ async function getPaymentData(groupId: string) {
 export default async function PaymentHandler({ params }: Props) {
   const data = await getPaymentData(params.id)
 
-  return <PaymentPage {...data} />
+  return <PaymentPage {...data} members={[]} />
 } 
