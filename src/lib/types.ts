@@ -9,6 +9,7 @@ export interface User {
 export interface Profile {
   user_id: string
   display_name?: string | null
+  email?: string | null
   age: number | null
   tags: string[] // max 3
   personality: 'outgoing' | 'shy_at_first' | 'somewhere_in_between' | null

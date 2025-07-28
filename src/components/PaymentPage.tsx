@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSupabase } from './SupabaseProvider'
 import { CreditCard, Users, Calendar, MapPin, ArrowLeft, Loader2 } from 'lucide-react'
 import { getStripe } from '@/lib/stripe'
 import type { User, Group, Profile } from '@/lib/types'
@@ -14,8 +15,46 @@ interface PaymentPageProps {
 
 export default function PaymentPage({ user, group, members }: PaymentPageProps) {
   const router = useRouter()
+  const { supabase } = useSupabase()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [checkingPayment, setCheckingPayment] = useState(true)
+
+  // Check payment status on component mount and when user returns from Stripe
+  useEffect(() => {
+    const checkPaymentStatus = async () => {
+      try {
+        const { data: existingPayment } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('group_id', group.id)
+          .eq('user_id', user.id)
+          .single()
+
+        if (existingPayment) {
+          // Payment found, redirect to group page
+          router.push(`/group/${group.id}`)
+          return
+        }
+      } catch (error) {
+        console.log('No payment found, staying on payment page')
+      } finally {
+        setCheckingPayment(false)
+      }
+    }
+
+    checkPaymentStatus()
+
+    // Also check when the user comes back to the tab (e.g., from Stripe)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkPaymentStatus()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [group.id, user.id, router, supabase])
 
   const formatDateTime = (datetime: string) => {
     const date = new Date(datetime)
@@ -73,6 +112,18 @@ export default function PaymentPage({ user, group, members }: PaymentPageProps) 
     }
   }
 
+  // Show loading while checking payment status
+  if (checkingPayment) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-[#698a7b]" />
+          <span className="ml-2 text-gray-600">Checking payment status...</span>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Back Button */}
@@ -105,13 +156,6 @@ export default function PaymentPage({ user, group, members }: PaymentPageProps) 
           </h2>
           
           <div className="space-y-3">
-            {group.venue_name && (
-              <div className="flex items-center text-gray-600">
-                <MapPin className="h-5 w-5 mr-3 flex-shrink-0" />
-                <span>{group.venue_name}</span>
-              </div>
-            )}
-            
             {group.event_datetime && (
               <div className="flex items-center text-gray-600">
                 <Calendar className="h-5 w-5 mr-3 flex-shrink-0" />
@@ -121,7 +165,7 @@ export default function PaymentPage({ user, group, members }: PaymentPageProps) 
             
             <div className="flex items-center text-gray-600">
               <Users className="h-5 w-5 mr-3 flex-shrink-0" />
-              <span>{group.member_ids.length} members in your crew</span>
+              <span>{group.member_ids.length} members in your event</span>
             </div>
           </div>
         </div>

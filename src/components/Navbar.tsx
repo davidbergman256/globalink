@@ -16,14 +16,13 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-    }
-    
-    getUser()
-
+    // Only listen to auth state changes instead of fetching user each time
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    // Get initial user state
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
     })
 
@@ -38,7 +37,6 @@ export default function Navbar() {
   const getLinkClassName = (path: string) => {
     const baseClasses = "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
     const activeClasses = "text-[#698a7b] dark:text-[#698a7b] font-semibold"
-    console.log('Current pathname:', pathname, 'Checking path:', path, 'Match:', pathname === path)
     return pathname === path ? `${baseClasses} ${activeClasses}` : baseClasses
   }
 

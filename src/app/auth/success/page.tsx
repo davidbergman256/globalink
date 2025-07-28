@@ -12,8 +12,6 @@ export default function AuthSuccess() {
   useEffect(() => {
     const handleAuth = async () => {
       try {
-        console.log('Auth success page loaded')
-        
         // Wait for auth state to settle and refresh session
         await new Promise(resolve => setTimeout(resolve, 1000))
         

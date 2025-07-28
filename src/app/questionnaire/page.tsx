@@ -102,6 +102,7 @@ export default function QuestionnairePage() {
       const profileData = {
         user_id: user.id,
         display_name: answers.display_name.trim(),
+        email: user.email,
         from_location: answers.from_location.trim(),
         current_location: answers.current_location.trim(),
         personality: answers.personality,
@@ -120,8 +121,6 @@ export default function QuestionnairePage() {
         }
       }
 
-      console.log('Submitting profile data:', profileData)
-
       // Upsert profile
       const { error: profileError } = await supabase
         .from('profiles')
@@ -134,8 +133,6 @@ export default function QuestionnairePage() {
 
       // Immediately add to queue for matching (reduce churn)
       const campus = answers.current_location.trim()
-      
-      console.log('Adding user to queue with campus:', campus)
       
       const { error: queueError } = await supabase
         .from('queue')
@@ -150,7 +147,6 @@ export default function QuestionnairePage() {
         console.warn('Failed to add to queue, but profile was saved successfully')
       }
 
-      console.log('Questionnaire completed successfully, redirecting to dashboard')
       router.push('/')
 
     } catch (error: any) {

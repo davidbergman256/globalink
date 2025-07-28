@@ -111,7 +111,7 @@ export default function AdminDashboard({
       })
 
       alert(`Group created successfully! Group ID: ${group.id}`)
-      router.refresh()
+      window.location.reload()
 
     } catch (error: any) {
       console.error('Error creating group:', error)
@@ -130,7 +130,7 @@ export default function AdminDashboard({
 
       if (error) throw error
 
-      router.refresh()
+      window.location.reload()
     } catch (error: any) {
       console.error('Error updating group:', error)
       alert('Failed to update group status')

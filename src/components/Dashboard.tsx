@@ -47,8 +47,8 @@ export default function Dashboard({
 
       if (error) throw error
 
-      // Refresh the page to show updated queue status
-      router.refresh()
+      // Redirect to refresh data
+      window.location.reload()
     } catch (error: any) {
       setError(error.message)
     } finally {
@@ -68,7 +68,7 @@ export default function Dashboard({
 
       if (error) throw error
 
-      router.refresh()
+      window.location.reload()
     } catch (error: any) {
       setError(error.message)
     } finally {

@@ -31,8 +31,6 @@ export default function AuthForm() {
     }
 
     try {
-      console.log('Sending magic link to:', email)
-      
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {

@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS profiles CASCADE;
 CREATE TABLE profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name TEXT NOT NULL,
+  email TEXT NOT NULL,
   age INTEGER,
   tags TEXT[] DEFAULT '{}', -- max 3 tags
   personality TEXT CHECK (personality IN ('outgoing', 'shy_at_first', 'somewhere_in_between')),
