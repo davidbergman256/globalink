@@ -35,7 +35,7 @@ async function getAdminData() {
       .rpc('get_user_emails_for_admin', { user_ids: queueUserIds })
     
     if (userEmailData) {
-      userEmailData.forEach(user => {
+      userEmailData.forEach((user: any) => {
         userEmails[user.user_id] = user.email
         userDisplayNames[user.user_id] = user.display_name || `User ${user.user_id.slice(0, 8)}`
       })
