@@ -47,7 +47,7 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
             Payment Successful!
           </h1>
           <p className="text-lg text-gray-600 mb-8">
-            Your spot in the group is now secured. You'll receive location details soon!
+            Your spot in the group is now secured. You&apos;ll receive location details soon!
           </p>
           
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
