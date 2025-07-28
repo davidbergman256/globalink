@@ -36,12 +36,6 @@ export default function AuthForm() {
     }
 
     try {
-      if (!supabase) {
-        setMessage('Authentication system not available')
-        setIsLoading(false)
-        return
-      }
-
       console.log('Sending magic link to:', email)
       
       const { error } = await supabase.auth.signInWithOtp({

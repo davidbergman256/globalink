@@ -17,11 +17,6 @@ export default function AuthSuccess() {
         // Wait for auth state to settle
         await new Promise(resolve => setTimeout(resolve, 1000))
         
-        if (!supabase) {
-          router.push('/login')
-          return
-        }
-
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {

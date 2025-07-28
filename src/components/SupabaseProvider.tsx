@@ -5,23 +5,15 @@ import { createSupabaseClient } from '@/lib/supabaseClient'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 type SupabaseContext = {
-  supabase: SupabaseClient | null
+  supabase: SupabaseClient
 }
 
 const Context = createContext<SupabaseContext | undefined>(undefined)
 
 export default function SupabaseProvider({ children }: { children: React.ReactNode }) {
-  const [supabase] = useState(() => {
-    // Skip Supabase initialization during build time
-    if (typeof window === 'undefined' && !process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      return null
-    }
-    return createSupabaseClient()
-  })
+  const [supabase] = useState(() => createSupabaseClient())
 
   useEffect(() => {
-    if (!supabase) return
-
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {
