@@ -9,8 +9,11 @@ async function getUserData() {
   
   const { data: { user } } = await supabase.auth.getUser()
   
+  console.log('Home page - user data:', user ? 'User found' : 'No user', user?.email)
+  
   // Middleware ensures we have a user here
   if (!user) {
+    console.log('Home page - No user, redirecting to login')
     redirect('/login')
   }
 
@@ -21,7 +24,10 @@ async function getUserData() {
     .eq('user_id', user.id)
     .single()
 
+  console.log('Home page - profile check:', profile ? 'Profile found' : 'No profile')
+
   if (!profile) {
+    console.log('Home page - No profile, redirecting to questionnaire')
     redirect('/questionnaire')
   }
 

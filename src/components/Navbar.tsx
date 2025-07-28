@@ -38,6 +38,7 @@ export default function Navbar() {
   const getLinkClassName = (path: string) => {
     const baseClasses = "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
     const activeClasses = "text-[#698a7b] dark:text-[#698a7b] font-semibold"
+    console.log('Current pathname:', pathname, 'Checking path:', path, 'Match:', pathname === path)
     return pathname === path ? `${baseClasses} ${activeClasses}` : baseClasses
   }
 

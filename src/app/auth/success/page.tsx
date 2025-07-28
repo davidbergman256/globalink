@@ -14,9 +14,11 @@ export default function AuthSuccess() {
       try {
         console.log('Auth success page loaded')
         
-        // Wait for auth state to settle
+        // Wait for auth state to settle and refresh session
         await new Promise(resolve => setTimeout(resolve, 1000))
         
+        // Force refresh the session to ensure it's synced
+        await supabase.auth.refreshSession()
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
@@ -39,10 +41,12 @@ export default function AuthSuccess() {
 
           if (!profile) {
             console.log('New user, going to questionnaire')
-            router.push('/questionnaire')
+            // Use window.location for a hard refresh to ensure session is synced
+            window.location.href = '/questionnaire'
           } else {
             console.log('Existing user, going to dashboard')
-            router.push('/')
+            // Use window.location for a hard refresh to ensure session is synced
+            window.location.href = '/'
           }
         } else {
           console.log('No session found')
