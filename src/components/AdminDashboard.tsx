@@ -209,6 +209,8 @@ export default function AdminDashboard({
                             <span className="ml-2">
                               • {profile.personality === 'somewhere_in_between' 
                                   ? 'Somewhere in between' 
+                                  : profile.personality === 'shy_at_first'
+                                  ? 'Shy at first'
                                   : profile.personality.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
                                 }
                             </span>

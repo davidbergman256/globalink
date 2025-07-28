@@ -282,10 +282,12 @@ export default function GroupDetail({
                     <div className="flex items-center space-x-4 mt-1">
                       {member.personality && (
                         <span className="text-xs text-gray-500">
-                          {member.personality === 'somewhere_in_between' 
-                            ? 'Somewhere in between' 
-                            : member.personality.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
-                          }
+                                                     {member.personality === 'somewhere_in_between'
+                             ? 'Somewhere in between'
+                             : member.personality === 'shy_at_first'
+                             ? 'Shy at first'
+                             : member.personality.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+                           }
                         </span>
                       )}
                       {member.from_location && (

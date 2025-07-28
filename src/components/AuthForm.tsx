@@ -13,15 +13,10 @@ export default function AuthForm() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  const testEmails = [
-    'bergmandavid24.7on@gmail.com', 
-    'globalink.supp@gmail.com',
-    'alphatester7902@gmail.com',
-    'alphatester7900@gmail.com'
-  ]
-  
-  const isValidEmail = (email: string) => {
-    return email.endsWith('.edu') || testEmails.includes(email)
+    const isValidEmail = (email: string) => {
+    // Accept any valid email format now that user curation is manual
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,7 +25,7 @@ export default function AuthForm() {
     setError('')
 
     if (!isValidEmail(email)) {
-      setError('Please use your .edu email address')
+      setError('Please enter a valid email address')
       setLoading(false)
       return
     }
@@ -109,12 +104,12 @@ export default function AuthForm() {
                 type="email"
                 required
                 className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:ring-[#698a7b] focus:border-[#698a7b]"
-                placeholder="your.email@university.edu"
+                placeholder="your.email@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <p className="mt-1 text-xs text-gray-500">Student emails only</p>
+
           </div>
 
           <button
