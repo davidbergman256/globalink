@@ -45,7 +45,7 @@ async function getGroupData(groupId: string) {
     .in('user_id', group.member_ids)
 
   // Get display names for members
-  const userEmails = group.member_ids.map(id => {
+  const userEmails = group.member_ids.map((id: string) => {
     const member = members?.find(m => m.user_id === id)
     const displayName = member?.display_name || `User ${id.slice(0, 8)}`
     return { id, email: `${displayName}@globalink.app` }
