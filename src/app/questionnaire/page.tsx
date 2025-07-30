@@ -173,7 +173,7 @@ export default function QuestionnairePage() {
       }
 
       // Save complete profile
-      const profileData = {
+      const profileData: any = {
         user_id: user.id,
         display_name: answers.display_name.trim(),
         email: user.email,
