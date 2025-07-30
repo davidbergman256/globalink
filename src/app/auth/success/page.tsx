@@ -12,21 +12,35 @@ export default function AuthSuccess() {
   useEffect(() => {
     const handleAuth = async () => {
       try {
+        console.log('Auth success page loaded, URL:', window.location.href)
+        
         // Extract tokens from magic link URL
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
         
+        console.log('Tokens found:', !!accessToken, !!refreshToken)
+        
         if (accessToken && refreshToken) {
           // Set session from magic link tokens
-          await supabase.auth.setSession({
+          const { error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken
           })
+          
+          if (sessionError) {
+            console.error('Session set error:', sessionError)
+            setStatus('error')
+            return
+          }
+          console.log('Session set successfully')
+        } else {
+          console.log('No tokens found, checking existing session')
         }
         
         // Get the session
         const { data: { session }, error } = await supabase.auth.getSession()
+        console.log('Session check result:', !!session, error)
         
         if (error) {
           console.error('Session error:', error)
@@ -52,9 +66,8 @@ export default function AuthSuccess() {
             router.push('/')
           }
         } else {
-          console.log('No session found')
-          setStatus('no-session')
-          setTimeout(() => router.push('/login'), 3000)
+          console.log('No session found, redirecting to login')
+          router.push('/login')
         }
       } catch (error) {
         console.error('Auth handling error:', error)
