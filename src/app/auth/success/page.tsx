@@ -62,7 +62,7 @@ export default function AuthSuccess() {
   }, [supabase, router])
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-[#F5F2EA] flex items-center justify-center">
       <div className="text-center">
         {status === 'checking' && (
           <>

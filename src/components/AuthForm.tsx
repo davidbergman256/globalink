@@ -56,7 +56,7 @@ export default function AuthForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F2EA] py-12 px-4">
         <div className="max-w-md w-full text-center">
           <CheckCircle className="mx-auto h-16 w-16 text-green-600 mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Check your email!</h1>
@@ -78,7 +78,7 @@ export default function AuthForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#F5F2EA] py-12 px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">globalink</h1>

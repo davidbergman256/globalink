@@ -190,7 +190,7 @@ export default function GroupDetail({
 
       {/* Location Card */}
       {canViewLocation && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+        <div className="bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="text-center">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">
               {group.venue_name}
@@ -237,7 +237,7 @@ export default function GroupDetail({
 
       {/* Shared Interests */}
       {sharedTags.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+        <div className="bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
             What you have in common
           </h3>
@@ -256,7 +256,7 @@ export default function GroupDetail({
       )}
 
       {/* Crew Members */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+      <div className="bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           Your Crew ({members.length} members)
         </h3>
@@ -267,7 +267,7 @@ export default function GroupDetail({
             const isCurrentUser = member.user_id === user.id
             
             return (
-              <div key={member.user_id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div key={member.user_id} className="flex items-center justify-between p-4 bg-[#F5F2EA] rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                     <UserIcon className="h-5 w-5 text-[#698a7b]" />
@@ -328,7 +328,7 @@ export default function GroupDetail({
 
       {/* RSVP Section */}
       {group.event_datetime && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
             Will you be there?
           </h3>

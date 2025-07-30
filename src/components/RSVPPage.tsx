@@ -30,7 +30,7 @@ export default function RSVPPage({ user, group, existingRsvp, response }: RSVPPa
   const currentResponse = response || existingRsvp?.answer
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F2EA] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${
@@ -71,7 +71,7 @@ export default function RSVPPage({ user, group, existingRsvp, response }: RSVPPa
           )}
 
           {group.event_datetime && group.venue_name && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <div className="bg-[#F9F6EE] rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Event Details</h2>
               
               <div className="space-y-3 text-left">

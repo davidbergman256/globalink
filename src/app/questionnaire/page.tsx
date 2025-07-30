@@ -91,7 +91,7 @@ export default function QuestionnairePage() {
   // Don't render until auth is checked
   if (!authChecked || !user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#F5F2EA] flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#698a7b]"></div>
       </div>
     )
@@ -478,7 +478,7 @@ export default function QuestionnairePage() {
   const isOptionalSection = question.optional
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F2EA] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         {/* Progress Bar */}
         <div className="mb-8">
@@ -507,7 +507,7 @@ export default function QuestionnairePage() {
         )}
 
         {/* Question Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div className="bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 p-8">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               {question.title}
@@ -557,7 +557,7 @@ export default function QuestionnairePage() {
                   const dayAvailability = answers.availability?.[dateKey]
                   
                   return (
-                    <div key={dateKey} className="bg-gray-50 rounded-lg p-4">
+                    <div key={dateKey} className="bg-[#F5F2EA] rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 text-gray-500 mr-2" />

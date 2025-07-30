@@ -129,7 +129,7 @@ export default function Dashboard({
 
       {/* Current Group Card */}
       {currentGroup && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+        <div className="bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-start justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Your Crew</h2>
             {getStatusBadge(currentGroup.status)}
@@ -192,7 +192,7 @@ export default function Dashboard({
 
       {/* Queue Status or Join Queue */}
       {!currentGroup && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+        <div className="bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           {queueEntry ? (
             <div className="text-center">
               <div className="w-16 h-16 bg-[#f0f4f2] rounded-full flex items-center justify-center mx-auto mb-4">
@@ -244,14 +244,14 @@ export default function Dashboard({
 
       {/* History */}
       {pastGroups.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">History</h2>
           <div className="space-y-4">
             {pastGroups.map((group) => {
               const needsFeedback = group.status === 'completed' && !feedbackStatus?.includes(group.id)
               
               return (
-                <div key={group.id} className="p-4 bg-gray-50 rounded-md">
+                <div key={group.id} className="p-4 bg-[#F5F2EA] rounded-md">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center space-x-2">

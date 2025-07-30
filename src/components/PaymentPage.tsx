@@ -135,7 +135,7 @@ export default function PaymentPage({ user, group, members }: PaymentPageProps) 
         Back to group
       </button>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {/* Header */}
         <div className="bg-[#698a7b] px-6 py-8">
           <div className="text-center">
@@ -176,7 +176,7 @@ export default function PaymentPage({ user, group, members }: PaymentPageProps) 
             Payment Summary
           </h2>
           
-          <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="bg-[#F5F2EA] rounded-lg p-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-gray-600">Meetup deposit</span>
               <span className="font-medium">$8.00</span>

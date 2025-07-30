@@ -3,7 +3,7 @@ import { Mail } from 'lucide-react'
 export default function ContactPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+              <div className="bg-[#F9F6EE] dark:bg-gray-800 shadow rounded-lg">
         <div className="px-6 py-8">
           <div className="text-center">
             <Mail className="mx-auto h-12 w-12 text-[#698a7b]" />

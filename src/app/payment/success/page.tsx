@@ -39,7 +39,7 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F2EA] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <CheckCircle className="mx-auto h-16 w-16 text-green-500 mb-4" />
@@ -50,7 +50,7 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
             Your spot in the group is now secured. You&apos;ll receive location details soon!
           </p>
           
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
+          <div className="bg-[#F9F6EE] p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">
               Payment Details
             </h2>
@@ -71,7 +71,7 @@ export default async function PaymentSuccessPage({ searchParams }: Props) {
             
             <Link
               href="/"
-              className="w-full flex justify-center py-3 px-4 border border-[#698a7b] rounded-md shadow-sm text-sm font-medium text-[#698a7b] bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#698a7b]"
+              className="w-full flex justify-center py-3 px-4 border border-[#698a7b] rounded-md shadow-sm text-sm font-medium text-[#698a7b] bg-[#F9F6EE] hover:bg-[#F5F2EA] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#698a7b]"
             >
               Back to Dashboard
             </Link>

@@ -92,7 +92,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
 
   if (submitted && !existingFeedback) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[#F5F2EA] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="h-10 w-10 text-green-600" />
@@ -115,7 +115,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F2EA] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -141,7 +141,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div className="bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 p-8">
           {/* Step 1: Star Rating */}
           {step === 1 && (
             <div className="text-center">
@@ -269,7 +269,7 @@ export default function FeedbackPage({ user, group, existingFeedback }: Feedback
                 {feedback.comment && (
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">Comment</h3>
-                    <p className="text-gray-600 bg-gray-50 p-4 rounded-md">
+                    <p className="text-gray-600 bg-[#F5F2EA] p-4 rounded-md">
                       &quot;{feedback.comment}&quot;
                     </p>
                   </div>

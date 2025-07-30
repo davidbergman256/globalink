@@ -194,7 +194,7 @@ export default function AdminDashboard({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Queue Management */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Queue ({queueEntries.length} users)
@@ -285,7 +285,7 @@ export default function AdminDashboard({
         </div>
 
         {/* Group Creation Form */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Create Group
@@ -359,7 +359,7 @@ export default function AdminDashboard({
 
       {/* Active Groups */}
       {activeGroups.length > 0 && (
-        <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="mt-8 bg-[#F9F6EE] rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">
             Active Groups ({activeGroups.length})
           </h2>

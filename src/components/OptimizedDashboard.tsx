@@ -41,7 +41,7 @@ export const QueueStatus = memo(function QueueStatus({
   }
 
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+    <div className="bg-[#F5F2EA] border border-gray-200 rounded-lg p-6">
       <div className="text-center">
         <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -91,7 +91,7 @@ export const CurrentGroup = memo(function CurrentGroup({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-[#F9F6EE] rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="px-6 py-4 bg-green-50 border-b border-green-200">
         <h2 className="text-xl font-semibold text-gray-900">Your Crew</h2>
       </div>
@@ -152,7 +152,7 @@ export const PastGroups = memo(function PastGroups({
   if (!pastGroups?.length) return null
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="bg-[#F9F6EE] rounded-lg shadow-sm border border-gray-200">
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-xl font-semibold text-gray-900">Past Events</h2>
       </div>
@@ -162,7 +162,7 @@ export const PastGroups = memo(function PastGroups({
           const needsFeedback = group.status === 'completed' && !feedbackStatus?.includes(group.id)
           
           return (
-            <div key={group.id} className="p-6 hover:bg-gray-50">
+            <div key={group.id} className="p-6 hover:bg-[#F5F2EA]">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium text-gray-900">
