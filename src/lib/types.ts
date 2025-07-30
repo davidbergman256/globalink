@@ -16,6 +16,7 @@ export interface Profile {
   challenge: 'language_barriers' | 'missing_home' | 'finding_interests' | 'other' | null
   pref_activity: 'studying_together' | 'exploring_city' | 'gaming_online' | 'trying_foods' | 'other' | null
   branches: Record<string, any> // JSON for branching questionnaire responses
+  availability: WeeklyAvailability | null // Current week availability
   from_location: string | null
   current_location: string | null
   created_at: string
@@ -64,10 +65,19 @@ export interface Feedback {
   created_at: string
 }
 
+// Availability types
+export interface WeeklyAvailability {
+  [date: string]: {
+    afternoon: boolean // 4pm-7pm
+    evening: boolean   // 7pm-10pm
+  }
+}
+
 // Questionnaire types
 export interface QuestionnaireAnswers {
-  // Core questions (1-6)
+  // Core questions (1-8)
   display_name: string
+  age: number
   from_location: string
   current_location: string
   personality: 'outgoing' | 'shy_at_first' | 'somewhere_in_between'
@@ -75,6 +85,7 @@ export interface QuestionnaireAnswers {
   challenge_other?: string // If "other" is selected
   activity: 'studying_together' | 'exploring_city' | 'gaming_online' | 'trying_foods' | 'other'
   activity_other?: string // If "other" is selected
+  availability: WeeklyAvailability
   
   // Branching questions (6-10)
   favorite_dish?: string // If chose "trying_foods"

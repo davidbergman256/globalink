@@ -20,6 +20,8 @@ CREATE TABLE profiles (
   pref_activity TEXT CHECK (pref_activity IN ('studying_together', 'exploring_city', 'gaming_online', 'trying_foods', 'other')),
   -- Branching fields stored as JSON
   branches JSONB DEFAULT '{}',
+  -- Availability for current week: {date: {afternoon: boolean, evening: boolean}}
+  availability JSONB,
   -- Questionnaire responses
   from_location TEXT,
   current_location TEXT,

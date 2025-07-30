@@ -3,8 +3,43 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSupabase } from '@/components/SupabaseProvider'
-import { ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react'
-import type { QuestionnaireAnswers } from '@/lib/types'
+import { ArrowRight, ArrowLeft, CheckCircle, Calendar, Clock } from 'lucide-react'
+import type { QuestionnaireAnswers, WeeklyAvailability } from '@/lib/types'
+
+// Helper functions for availability calendar
+const getWeekDates = () => {
+  const today = new Date()
+  const currentDay = today.getDay() // 0 = Sunday, 1 = Monday, etc.
+  const monday = new Date(today)
+  monday.setDate(today.getDate() - currentDay + (currentDay === 0 ? -6 : 1)) // Get this week's Monday
+  
+  const dates = []
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(monday)
+    date.setDate(monday.getDate() + i)
+    dates.push(date)
+  }
+  return dates
+}
+
+const formatDateForDisplay = (date: Date) => {
+  const today = new Date()
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
+  
+  if (date.toDateString() === today.toDateString()) return 'Today'
+  if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow'
+  
+  return date.toLocaleDateString('en-US', { 
+    weekday: 'short', 
+    month: 'short', 
+    day: 'numeric' 
+  })
+}
+
+const formatDateKey = (date: Date) => {
+  return date.toISOString().split('T')[0] // YYYY-MM-DD format
+}
 
 export default function QuestionnairePage() {
   const { supabase } = useSupabase()
@@ -14,6 +49,24 @@ export default function QuestionnairePage() {
   const [answers, setAnswers] = useState<Partial<QuestionnaireAnswers>>({})
   const [user, setUser] = useState<any>(null)
   const [authChecked, setAuthChecked] = useState(false)
+
+  // Initialize availability with all slots unchecked
+  useEffect(() => {
+    if (!answers.availability) {
+      const weekDates = getWeekDates()
+      const initialAvailability: WeeklyAvailability = {}
+      
+      weekDates.forEach(date => {
+        const dateKey = formatDateKey(date)
+        initialAvailability[dateKey] = {
+          afternoon: false,
+          evening: false
+        }
+      })
+      
+      setAnswers(prev => ({ ...prev, availability: initialAvailability }))
+    }
+  }, [answers.availability])
 
   // Simple auth check
   useEffect(() => {
@@ -45,21 +98,34 @@ export default function QuestionnairePage() {
   }
 
   const getTotalSteps = () => {
-    let steps = 6 // Core questions
+    let steps = 8 // Core questions (including age and availability)
 
     // Add branching questions
-    if (answers.activity === 'trying_foods') steps += 2 // Q6, Q7
-    if (answers.activity === 'gaming_online') steps += 2 // Q8, Q9
-    if (answers.challenge === 'missing_home') steps += 1 // Q10
+    if (answers.activity === 'trying_foods') steps += 2 // Q8, Q9
+    if (answers.activity === 'gaming_online') steps += 2 // Q10, Q11
+    if (answers.challenge === 'missing_home') steps += 1 // Q12
 
     // Add optional questions
-    steps += 2 // Q11, Q12
+    steps += 2 // Q13, Q14
 
     return steps
   }
 
   const handleAnswer = (key: keyof QuestionnaireAnswers, value: any) => {
     setAnswers(prev => ({ ...prev, [key]: value }))
+  }
+
+  const handleAvailabilityToggle = (dateKey: string, slot: 'afternoon' | 'evening') => {
+    setAnswers(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        [dateKey]: {
+          ...prev.availability?.[dateKey],
+          [slot]: !prev.availability?.[dateKey]?.[slot]
+        }
+      }
+    }))
   }
 
   const nextStep = () => {
@@ -80,7 +146,7 @@ export default function QuestionnairePage() {
 
   const skipToOptional = () => {
     // Skip to first optional question
-    let skipTo = 6 // After core questions
+    let skipTo = 8 // After core questions
     
     if (answers.activity === 'trying_foods') skipTo += 2
     if (answers.activity === 'gaming_online') skipTo += 2
@@ -94,8 +160,13 @@ export default function QuestionnairePage() {
     
     try {
       // Validate required fields
-      if (!answers.display_name || !answers.from_location || !answers.current_location || !answers.personality || !answers.challenge || !answers.activity) {
+      if (!answers.display_name || !answers.age || !answers.from_location || !answers.current_location || !answers.personality || !answers.challenge || !answers.activity || !answers.availability) {
         throw new Error('Please complete all required questions')
+      }
+
+      // Validate age
+      if (answers.age < 16 || answers.age > 99) {
+        throw new Error('Please enter a valid age between 16 and 99')
       }
 
       // Save complete profile
@@ -103,11 +174,13 @@ export default function QuestionnairePage() {
         user_id: user.id,
         display_name: answers.display_name.trim(),
         email: user.email,
+        age: answers.age,
         from_location: answers.from_location.trim(),
         current_location: answers.current_location.trim(),
         personality: answers.personality,
         challenge: answers.challenge,
         pref_activity: answers.activity,
+        availability: answers.availability,
         branches: {
           challenge_other: answers.challenge_other?.trim() || null,
           activity_other: answers.activity_other?.trim() || null,
@@ -158,10 +231,10 @@ export default function QuestionnairePage() {
   }
 
   const getCurrentQuestion = () => {
-    const coreQuestions = 6
+    const coreQuestions = 8
     let branchingStart = coreQuestions
 
-    // Core questions (1-5)
+    // Core questions (1-8)
     if (currentStep <= coreQuestions) {
       switch (currentStep) {
         case 1:
@@ -174,13 +247,21 @@ export default function QuestionnairePage() {
 
         case 2:
           return {
+            title: "What's your age?",
+            type: "number" as const,
+            key: "age" as const,
+            placeholder: "e.g., 20"
+          }
+
+        case 3:
+          return {
             title: "Where are you originally from?",
             type: "text" as const,
             key: "from_location" as const,
             placeholder: "e.g., Tokyo, Japan"
           }
 
-        case 3:
+        case 4:
           return {
             title: "Where do you live now?",
             type: "text" as const,
@@ -188,7 +269,7 @@ export default function QuestionnairePage() {
             placeholder: "e.g., Boston, MA"
           }
 
-        case 4:
+        case 5:
           return {
             title: "Would you describe yourself as:",
             type: "choice" as const,
@@ -200,7 +281,7 @@ export default function QuestionnairePage() {
             ]
           }
 
-        case 5:
+        case 6:
           return {
             title: "What's been the hardest part about making friends here?",
             type: "choice" as const,
@@ -213,7 +294,7 @@ export default function QuestionnairePage() {
             ]
           }
 
-        case 6:
+        case 7:
           return {
             title: "How do you prefer to spend time with friends?",
             type: "choice" as const,
@@ -225,6 +306,14 @@ export default function QuestionnairePage() {
               { value: "trying_foods", label: "Trying new foods" },
               { value: "other", label: "Other", hasOther: true, otherKey: "activity_other" }
             ]
+          }
+
+        case 8:
+          return {
+            title: "When are you available this week?",
+            type: "availability" as const,
+            key: "availability" as const,
+            subtitle: "Select times when you're free to meet up (we start events at 4pm earliest)"
           }
       }
     }
@@ -336,9 +425,25 @@ export default function QuestionnairePage() {
     if (question.optional) return true
     
     const value = answers[question.key]
+    
     if (question.type === "text") {
       return value && value.toString().trim().length > 0
     }
+    
+    if (question.type === "number") {
+      return value && typeof value === 'number' && value > 0
+    }
+    
+    if (question.type === "availability") {
+      const availability = answers.availability
+      if (!availability) return false
+      
+      // Check if at least one slot is selected
+      return Object.values(availability).some(day => 
+        day.afternoon || day.evening
+      )
+    }
+    
     return value !== undefined && value !== null
   }
 
@@ -394,6 +499,87 @@ export default function QuestionnairePage() {
                                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#698a7b] focus:border-[#698a7b] text-lg"
                 autoFocus
               />
+            </div>
+          )}
+
+          {question.type === "number" && (
+            <div className="mb-6">
+              <input
+                type="number"
+                value={answers[question.key] || ''}
+                onChange={(e) => handleAnswer(question.key, parseInt(e.target.value) || 0)}
+                placeholder={question.placeholder}
+                min="16"
+                max="99"
+                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#698a7b] focus:border-[#698a7b] text-lg"
+                autoFocus
+              />
+            </div>
+          )}
+
+          {question.type === "availability" && (
+            <div className="mb-6">
+              {question.subtitle && (
+                <p className="text-gray-600 mb-4">{question.subtitle}</p>
+              )}
+              
+              <div className="space-y-4">
+                {getWeekDates().map(date => {
+                  const dateKey = formatDateKey(date)
+                  const dayAvailability = answers.availability?.[dateKey]
+                  
+                  return (
+                    <div key={dateKey} className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 text-gray-500 mr-2" />
+                          <span className="font-medium text-gray-900">
+                            {formatDateForDisplay(date)}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          onClick={() => handleAvailabilityToggle(dateKey, 'afternoon')}
+                          className={`p-3 rounded-lg border-2 transition-all ${
+                            dayAvailability?.afternoon
+                              ? 'border-[#698a7b] bg-[#f0f4f2] text-[#3e5249]'
+                              : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                          }`}
+                        >
+                          <div className="flex items-center justify-center flex-col">
+                            <Clock className="h-4 w-4 mb-1" />
+                            <span className="text-sm font-medium">Afternoon</span>
+                            <span className="text-xs text-gray-500">4pm - 7pm</span>
+                          </div>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleAvailabilityToggle(dateKey, 'evening')}
+                          className={`p-3 rounded-lg border-2 transition-all ${
+                            dayAvailability?.evening
+                              ? 'border-[#698a7b] bg-[#f0f4f2] text-[#3e5249]'
+                              : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                          }`}
+                        >
+                          <div className="flex items-center justify-center flex-col">
+                            <Clock className="h-4 w-4 mb-1" />
+                            <span className="text-sm font-medium">Evening</span>
+                            <span className="text-xs text-gray-500">7pm - 10pm</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  💡 Select all times you&apos;re generally available. We&apos;ll only schedule events during your selected slots!
+                </p>
+              </div>
             </div>
           )}
 
@@ -460,7 +646,7 @@ export default function QuestionnairePage() {
               )}
 
               {/* Skip to optional section */}
-              {!isOptionalSection && currentStep === 6 && (
+              {!isOptionalSection && currentStep === 8 && (
                                  <button
                    onClick={skipToOptional}
                    className="px-6 py-2 text-[#698a7b] hover:text-[#5a7a6b] font-medium"

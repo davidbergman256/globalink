@@ -13,7 +13,7 @@ import {
   UserCheck,
   AlertCircle
 } from 'lucide-react'
-import type { User, QueueEntry, Group, Profile } from '@/lib/types'
+import type { User, QueueEntry, Group, Profile, WeeklyAvailability } from '@/lib/types'
 
 interface AdminDashboardProps {
   user: User
@@ -142,6 +142,34 @@ export default function AdminDashboard({
     return date.toISOString().slice(0, 16).replace('T', ' ')
   }
 
+  // Helper to format availability for display
+  const formatAvailability = (availability: WeeklyAvailability | null) => {
+    if (!availability) return 'No availability set'
+    
+    const today = new Date()
+    const availableSlots: string[] = []
+    
+    // Check next 7 days
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today)
+      date.setDate(today.getDate() + i)
+      const dateKey = date.toISOString().split('T')[0]
+      const dayData = availability[dateKey]
+      
+      if (dayData?.afternoon || dayData?.evening) {
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' })
+        const slots = []
+        if (dayData.afternoon) slots.push('PM')
+        if (dayData.evening) slots.push('Eve')
+        availableSlots.push(`${dayName} ${slots.join('+')}`)
+      }
+    }
+    
+    if (availableSlots.length === 0) return 'No availability this week'
+    if (availableSlots.length > 3) return `${availableSlots.slice(0, 2).join(', ')} +${availableSlots.length - 2} more`
+    return availableSlots.join(', ')
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8">
@@ -219,6 +247,12 @@ export default function AdminDashboard({
                         <div className="text-xs text-gray-500 mt-1">
                           Joined: {formatDateTime(entry.joined_at)}
                         </div>
+                        {profile?.availability && (
+                          <div className="text-xs text-green-600 mt-1 flex items-center">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            Available: {formatAvailability(profile.availability)}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
