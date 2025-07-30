@@ -12,11 +12,20 @@ export default function AuthSuccess() {
   useEffect(() => {
     const handleAuth = async () => {
       try {
-        // Wait for auth state to settle and refresh session
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Extract tokens from magic link URL
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const accessToken = hashParams.get('access_token')
+        const refreshToken = hashParams.get('refresh_token')
         
-        // Force refresh the session to ensure it's synced
-        await supabase.auth.refreshSession()
+        if (accessToken && refreshToken) {
+          // Set session from magic link tokens
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          })
+        }
+        
+        // Get the session
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
@@ -35,16 +44,12 @@ export default function AuthSuccess() {
             .eq('user_id', session.user.id)
             .single()
 
-          console.log('Profile exists:', !!profile)
-
           if (!profile) {
-            console.log('New user, going to questionnaire')
-            // Use window.location for a hard refresh to ensure session is synced
-            window.location.href = '/questionnaire'
+            // New user - go to questionnaire
+            router.push('/questionnaire')
           } else {
-            console.log('Existing user, going to dashboard')
-            // Use window.location for a hard refresh to ensure session is synced
-            window.location.href = '/'
+            // Existing user - go to dashboard
+            router.push('/')
           }
         } else {
           console.log('No session found')
