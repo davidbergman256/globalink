@@ -121,7 +121,8 @@ export default function QuestionnairePage() {
       availability: {
         ...prev.availability,
         [dateKey]: {
-          ...prev.availability?.[dateKey],
+          afternoon: prev.availability?.[dateKey]?.afternoon || false,
+          evening: prev.availability?.[dateKey]?.evening || false,
           [slot]: !prev.availability?.[dateKey]?.[slot]
         }
       }
