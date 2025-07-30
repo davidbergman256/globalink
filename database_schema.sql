@@ -17,7 +17,7 @@ CREATE TABLE profiles (
   tags TEXT[] DEFAULT '{}', -- max 3 tags
   personality TEXT CHECK (personality IN ('outgoing', 'shy_at_first', 'somewhere_in_between')),
   challenge TEXT CHECK (challenge IN ('language_barriers', 'missing_home', 'finding_interests', 'other')),
-  pref_activity TEXT CHECK (pref_activity IN ('studying_together', 'exploring_city', 'gaming_online', 'trying_foods', 'other')),
+  pref_activity TEXT CHECK (pref_activity IN ('sports', 'exploring_city', 'gaming_online', 'trying_foods', 'other')),
   -- Branching fields stored as JSON
   branches JSONB DEFAULT '{}',
   -- Availability for current week: {date: {afternoon: boolean, evening: boolean}}

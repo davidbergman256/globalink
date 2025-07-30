@@ -14,7 +14,7 @@ export interface Profile {
   tags: string[] // max 3
   personality: 'outgoing' | 'shy_at_first' | 'somewhere_in_between' | null
   challenge: 'language_barriers' | 'missing_home' | 'finding_interests' | 'other' | null
-  pref_activity: 'studying_together' | 'exploring_city' | 'gaming_online' | 'trying_foods' | 'other' | null
+  pref_activity: 'sports' | 'exploring_city' | 'gaming_online' | 'trying_foods' | 'other' | null
   branches: Record<string, any> // JSON for branching questionnaire responses
   availability: WeeklyAvailability | null // Current week availability
   from_location: string | null
@@ -65,11 +65,11 @@ export interface Feedback {
   created_at: string
 }
 
-// Availability types
+// Availability types - true = available, false = unavailable
 export interface WeeklyAvailability {
   [date: string]: {
-    afternoon: boolean // 4pm-7pm
-    evening: boolean   // 7pm-10pm
+    afternoon: boolean // 4pm-7pm (true = available, false = unavailable)
+    evening: boolean   // 7pm-10pm (true = available, false = unavailable)  
   }
 }
 
@@ -83,11 +83,13 @@ export interface QuestionnaireAnswers {
   personality: 'outgoing' | 'shy_at_first' | 'somewhere_in_between'
   challenge: 'language_barriers' | 'missing_home' | 'finding_interests' | 'other'
   challenge_other?: string // If "other" is selected
-  activity: 'studying_together' | 'exploring_city' | 'gaming_online' | 'trying_foods' | 'other'
+  activity: 'sports' | 'exploring_city' | 'gaming_online' | 'trying_foods' | 'other'
   activity_other?: string // If "other" is selected
   availability: WeeklyAvailability
   
-  // Branching questions (6-10)
+  // Branching questions (8-12)
+  favorite_sport?: string // If chose "sports"
+  sport_experience?: 'beginner' | 'intermediate' | 'advanced' // If chose "sports"
   favorite_dish?: string // If chose "trying_foods"
   likes_spicy?: boolean // If chose "trying_foods"
   gaming_platform?: 'console' | 'pc' | 'mobile' | 'all' // If chose "gaming_online"

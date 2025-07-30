@@ -148,6 +148,7 @@ export default function AdminDashboard({
     
     const today = new Date()
     const availableSlots: string[] = []
+    const unavailableSlots: string[] = []
     
     // Check next 7 days
     for (let i = 0; i < 7; i++) {
@@ -156,18 +157,28 @@ export default function AdminDashboard({
       const dateKey = date.toISOString().split('T')[0]
       const dayData = availability[dateKey]
       
-      if (dayData?.afternoon || dayData?.evening) {
+      if (dayData) {
         const dayName = date.toLocaleDateString('en-US', { weekday: 'short' })
-        const slots = []
-        if (dayData.afternoon) slots.push('PM')
-        if (dayData.evening) slots.push('Eve')
-        availableSlots.push(`${dayName} ${slots.join('+')}`)
+        const available = []
+        const unavailable = []
+        
+        if (dayData.afternoon === true) available.push('PM')
+        if (dayData.afternoon === false) unavailable.push('PM')
+        if (dayData.evening === true) available.push('Eve')
+        if (dayData.evening === false) unavailable.push('Eve')
+        
+        if (available.length > 0) {
+          availableSlots.push(`${dayName} ${available.join('+')}`)
+        }
+        if (unavailable.length > 0) {
+          unavailableSlots.push(`${dayName} ${unavailable.join('+')}`)
+        }
       }
     }
     
-    if (availableSlots.length === 0) return 'No availability this week'
-    if (availableSlots.length > 3) return `${availableSlots.slice(0, 2).join(', ')} +${availableSlots.length - 2} more`
-    return availableSlots.join(', ')
+    if (availableSlots.length === 0) return 'Completely unavailable this week'
+    if (availableSlots.length > 3) return `Available: ${availableSlots.slice(0, 2).join(', ')} +${availableSlots.length - 2} more`
+    return `Available: ${availableSlots.join(', ')}`
   }
 
   return (

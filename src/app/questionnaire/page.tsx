@@ -50,7 +50,7 @@ export default function QuestionnairePage() {
   const [user, setUser] = useState<any>(null)
   const [authChecked, setAuthChecked] = useState(false)
 
-  // Initialize availability with all slots unchecked
+  // Initialize availability with all slots available (user clicks to mark unavailable)
   useEffect(() => {
     if (!answers.availability) {
       const weekDates = getWeekDates()
@@ -59,8 +59,8 @@ export default function QuestionnairePage() {
       weekDates.forEach(date => {
         const dateKey = formatDateKey(date)
         initialAvailability[dateKey] = {
-          afternoon: false,
-          evening: false
+          afternoon: true,  // Default: available
+          evening: true     // Default: available
         }
       })
       
@@ -101,12 +101,13 @@ export default function QuestionnairePage() {
     let steps = 8 // Core questions (including age and availability)
 
     // Add branching questions
-    if (answers.activity === 'trying_foods') steps += 2 // Q8, Q9
-    if (answers.activity === 'gaming_online') steps += 2 // Q10, Q11
-    if (answers.challenge === 'missing_home') steps += 1 // Q12
+    if (answers.activity === 'sports') steps += 2 // Q9, Q10
+    if (answers.activity === 'trying_foods') steps += 2 // Q11, Q12
+    if (answers.activity === 'gaming_online') steps += 2 // Q13, Q14
+    if (answers.challenge === 'missing_home') steps += 1 // Q15
 
     // Add optional questions
-    steps += 2 // Q13, Q14
+    steps += 2 // Q16, Q17
 
     return steps
   }
@@ -121,8 +122,8 @@ export default function QuestionnairePage() {
       availability: {
         ...prev.availability,
         [dateKey]: {
-          afternoon: prev.availability?.[dateKey]?.afternoon || false,
-          evening: prev.availability?.[dateKey]?.evening || false,
+          afternoon: prev.availability?.[dateKey]?.afternoon ?? true,
+          evening: prev.availability?.[dateKey]?.evening ?? true,
           [slot]: !prev.availability?.[dateKey]?.[slot]
         }
       }
@@ -149,6 +150,7 @@ export default function QuestionnairePage() {
     // Skip to first optional question
     let skipTo = 8 // After core questions
     
+    if (answers.activity === 'sports') skipTo += 2
     if (answers.activity === 'trying_foods') skipTo += 2
     if (answers.activity === 'gaming_online') skipTo += 2
     if (answers.challenge === 'missing_home') skipTo += 1
@@ -185,6 +187,8 @@ export default function QuestionnairePage() {
         branches: {
           challenge_other: answers.challenge_other?.trim() || null,
           activity_other: answers.activity_other?.trim() || null,
+          favorite_sport: answers.favorite_sport?.trim() || null,
+          sport_experience: answers.sport_experience || null,
           favorite_dish: answers.favorite_dish?.trim() || null,
           likes_spicy: answers.likes_spicy,
           gaming_platform: answers.gaming_platform || null,
@@ -301,7 +305,7 @@ export default function QuestionnairePage() {
             type: "choice" as const,
             key: "activity" as const,
             options: [
-              { value: "studying_together", label: "Studying together" },
+              { value: "sports", label: "Playing sports" },
               { value: "exploring_city", label: "Exploring the city" },
               { value: "gaming_online", label: "Playing games online" },
               { value: "trying_foods", label: "Trying new foods" },
@@ -311,16 +315,41 @@ export default function QuestionnairePage() {
 
         case 8:
           return {
-            title: "When are you available this week?",
+            title: "When are you NOT available this week?",
             type: "availability" as const,
             key: "availability" as const,
-            subtitle: "Select times when you're free to meet up (we start events at 4pm earliest)"
+            subtitle: "Click on times when you're busy or unavailable (we start events at 4pm earliest)"
           }
       }
     }
 
     // Branching questions
     let branchStep = currentStep - coreQuestions
+
+    // Sports branching (if chose "sports")
+    if (answers.activity === 'sports') {
+      if (branchStep === 1) {
+        return {
+          title: "What's your favorite sport to play?",
+          type: "text" as const,
+          key: "favorite_sport" as const,
+          placeholder: "e.g., Basketball, Soccer, Tennis, Volleyball..."
+        }
+      }
+      if (branchStep === 2) {
+        return {
+          title: "How would you describe your experience level?",
+          type: "choice" as const,
+          key: "sport_experience" as const,
+          options: [
+            { value: "beginner", label: "Beginner (just starting out)" },
+            { value: "intermediate", label: "Intermediate (play occasionally)" },
+            { value: "advanced", label: "Advanced (very experienced)" }
+          ]
+        }
+      }
+      branchStep -= 2
+    }
 
     // Food branching (if chose "trying_foods")
     if (answers.activity === 'trying_foods') {
@@ -439,10 +468,8 @@ export default function QuestionnairePage() {
       const availability = answers.availability
       if (!availability) return false
       
-      // Check if at least one slot is selected
-      return Object.values(availability).some(day => 
-        day.afternoon || day.evening
-      )
+      // Always allow progression for availability (they can mark all as unavailable if needed)
+      return true
     }
     
     return value !== undefined && value !== null
@@ -544,30 +571,36 @@ export default function QuestionnairePage() {
                         <button
                           onClick={() => handleAvailabilityToggle(dateKey, 'afternoon')}
                           className={`p-3 rounded-lg border-2 transition-all ${
-                            dayAvailability?.afternoon
-                              ? 'border-[#698a7b] bg-[#f0f4f2] text-[#3e5249]'
-                              : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                            dayAvailability?.afternoon === false
+                              ? 'border-yellow-500 bg-yellow-100 text-yellow-800'
+                              : 'border-green-300 bg-green-50 hover:border-green-400 text-green-700'
                           }`}
                         >
                           <div className="flex items-center justify-center flex-col">
                             <Clock className="h-4 w-4 mb-1" />
                             <span className="text-sm font-medium">Afternoon</span>
-                            <span className="text-xs text-gray-500">4pm - 7pm</span>
+                            <span className="text-xs">4pm - 7pm</span>
+                            {dayAvailability?.afternoon === false && (
+                              <span className="text-xs font-medium mt-1">UNAVAILABLE</span>
+                            )}
                           </div>
                         </button>
                         
                         <button
                           onClick={() => handleAvailabilityToggle(dateKey, 'evening')}
                           className={`p-3 rounded-lg border-2 transition-all ${
-                            dayAvailability?.evening
-                              ? 'border-[#698a7b] bg-[#f0f4f2] text-[#3e5249]'
-                              : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                            dayAvailability?.evening === false
+                              ? 'border-yellow-500 bg-yellow-100 text-yellow-800'
+                              : 'border-green-300 bg-green-50 hover:border-green-400 text-green-700'
                           }`}
                         >
                           <div className="flex items-center justify-center flex-col">
                             <Clock className="h-4 w-4 mb-1" />
                             <span className="text-sm font-medium">Evening</span>
-                            <span className="text-xs text-gray-500">7pm - 10pm</span>
+                            <span className="text-xs">7pm - 10pm</span>
+                            {dayAvailability?.evening === false && (
+                              <span className="text-xs font-medium mt-1">UNAVAILABLE</span>
+                            )}
                           </div>
                         </button>
                       </div>
@@ -578,7 +611,7 @@ export default function QuestionnairePage() {
               
               <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-700">
-                  💡 Select all times you&apos;re generally available. We&apos;ll only schedule events during your selected slots!
+                  💡 Click on times when you&apos;re busy or unavailable. Green = Available, Yellow = Unavailable
                 </p>
               </div>
             </div>
