@@ -37,15 +37,6 @@ export async function middleware(req: NextRequest) {
 
   // If user is not signed in and trying to access a protected route
   if (!session && isProtectedRoute) {
-    // Special handling for root path on app subdomain
-    if (req.nextUrl.pathname === '/') {
-      const hostname = req.headers.get('host') || ''
-      if (hostname.includes('app.')) {
-        // Redirect to main marketing site instead of login
-        return NextResponse.redirect('https://myglobalink.co')
-      }
-    }
-    
     const redirectUrl = req.nextUrl.clone()
     redirectUrl.pathname = '/login'
     return NextResponse.redirect(redirectUrl)
