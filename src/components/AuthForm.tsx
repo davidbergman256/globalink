@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSupabase } from './SupabaseProvider'
 import { useRouter } from 'next/navigation'
 import { Mail, ArrowRight, CheckCircle } from 'lucide-react'
@@ -12,6 +12,32 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session?.user) {
+        // User is authenticated, check if profile exists
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('user_id', session.user.id)
+          .single()
+
+        if (!profile) {
+          // New user - go to questionnaire
+          router.push('/questionnaire')
+        } else {
+          // Existing user - go to dashboard
+          router.push('/')
+        }
+      }
+    }
+    
+    checkAuth()
+  }, [supabase, router])
 
     const isValidEmail = (email: string) => {
     // Accept any valid email format now that user curation is manual
