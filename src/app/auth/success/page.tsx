@@ -33,11 +33,11 @@ export default function AuthSuccess() {
           .single()
 
         if (!profile) {
-          // New user - go to questionnaire
-          router.push('/questionnaire')
+          // New user - force refresh to sync server session, then go to questionnaire
+          window.location.href = '/questionnaire'
         } else {
-          // Existing user - go to dashboard  
-          router.push('/')
+          // Existing user - force refresh to sync server session, then go to dashboard  
+          window.location.href = '/'
         }
       } else {
         // No session - back to login
