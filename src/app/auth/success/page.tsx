@@ -10,8 +10,17 @@ export default function AuthSuccess() {
 
   useEffect(() => {
     const handleAuth = async () => {
-      // Wait a moment for Supabase to process the magic link
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Process magic link tokens from URL
+      const hashParams = new URLSearchParams(window.location.hash.substring(1))
+      const accessToken = hashParams.get('access_token')
+      const refreshToken = hashParams.get('refresh_token')
+      
+      if (accessToken && refreshToken) {
+        await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        })
+      }
       
       const { data: { session } } = await supabase.auth.getSession()
 
