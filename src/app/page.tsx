@@ -135,21 +135,19 @@ export default function GlobalinkLanding() {
               className="h-8 transition-transform duration-300 hover:scale-105 flex items-center"
             >
               <span 
-                className="text-2xl font-bold"
+                className="text-2xl font-bold font-chicle"
                 style={{
-                  color: "#3B001B",
-                  fontFamily: "Chicle, cursive",
+                  color: "#3B001B"
                 }}
               >
                 GLOBALINK
               </span>
             </div>
             <button
-              className="px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-300 active:scale-95 hover:shadow-xl hover:translate-y-[-2px]"
+              className="px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-300 active:scale-95 hover:shadow-xl hover:translate-y-[-2px] font-inter"
               style={{
                 backgroundColor: "#FF8873",
-                color: "#3B001B",
-                fontFamily: "Inter, sans-serif",
+                color: "#3B001B"
               }}
               onClick={() => window.location.href = '/login'}
             >
@@ -161,13 +159,12 @@ export default function GlobalinkLanding() {
           <div className="grid lg:grid-cols-2 gap-8 items-center relative z-20">
             <div>
               <h1
-                className="font-bold mb-6 leading-tight animate-on-scroll whitespace-nowrap"
+                className="font-bold mb-6 leading-tight animate-on-scroll whitespace-nowrap font-orelega"
                 style={{
                   color: "#3B001B",
-                  fontFamily: "Chicle, cursive",
                   fontSize: "65px",
                   letterSpacing: "-0.03em",
-                  lineHeight: "90%",
+                  lineHeight: "90%"
                 }}
               >
                 Connect globally. Belong locally.
@@ -176,7 +173,7 @@ export default function GlobalinkLanding() {
                 className="mb-8 leading-relaxed animate-on-scroll"
                 style={{
                   color: "#3B001B",
-                  fontFamily: "Orelega One, cursive",
+                  
                   fontSize: "28px",
                   letterSpacing: "-0.04em",
                   lineHeight: "112%",
@@ -191,7 +188,7 @@ export default function GlobalinkLanding() {
                 style={{
                   backgroundColor: "#FF8873",
                   color: "#3B001B",
-                  fontFamily: "Inter, sans-serif",
+                  
                   animationDelay: "0.4s",
                 }}
                 onClick={() => window.location.href = '/login'}
@@ -232,19 +229,17 @@ export default function GlobalinkLanding() {
                 />
               </div>
               <h3
-                className="text-3xl font-bold mb-4"
+                className="text-3xl font-bold mb-4 font-chicle"
                 style={{
                   color: "#3B001B",
-                  fontFamily: "Chicle, cursive",
                 }}
               >
                 Tell Us About Yourself
               </h3>
               <p
-                className="font-bold"
+                className="font-bold font-inter"
                 style={{
                   color: "#3B001B",
-                  fontFamily: "Inter, sans-serif",
                 }}
               >
                 Sign up and take a short personality quiz.
@@ -264,19 +259,17 @@ export default function GlobalinkLanding() {
                 />
               </div>
               <h3
-                className="text-3xl font-bold mb-4"
+                className="text-3xl font-bold mb-4 font-chicle"
                 style={{
                   color: "#3B001B",
-                  fontFamily: "Chicle, cursive",
                 }}
               >
                 Get Matched
               </h3>
               <p
-                className="font-bold"
+                className="font-bold font-inter"
                 style={{
                   color: "#3B001B",
-                  fontFamily: "Inter, sans-serif",
                 }}
               >
                 We connect you with students from different cultural backgrounds.
@@ -296,19 +289,17 @@ export default function GlobalinkLanding() {
                 />
               </div>
               <h3
-                className="text-3xl font-bold mb-4"
+                className="text-3xl font-bold mb-4 font-chicle"
                 style={{
                   color: "#3B001B",
-                  fontFamily: "Chicle, cursive",
                 }}
               >
                 Meet In Person
               </h3>
               <p
-                className="font-bold"
+                className="font-bold font-inter"
                 style={{
                   color: "#3B001B",
-                  fontFamily: "Inter, sans-serif",
                 }}
               >
                 Attend a fun gathering near campus and enjoy your shared hobbies together!
@@ -332,7 +323,7 @@ export default function GlobalinkLanding() {
                   className="text-6xl font-bold mb-2 animate-on-scroll flex items-center justify-center"
                   style={{
                     color: "#3B001B",
-                    fontFamily: "Chicle, cursive",
+                    
                     textShadow: "0 4px 8px rgba(59, 0, 27, 0.1)",
                   }}
                 >
@@ -342,7 +333,7 @@ export default function GlobalinkLanding() {
                   className="text-xl font-bold"
                   style={{
                     color: "#3B001B",
-                    fontFamily: "Inter, sans-serif",
+                    
                   }}
                 >
                   Meetups Organized
@@ -362,7 +353,7 @@ export default function GlobalinkLanding() {
             className="text-6xl font-bold text-center mb-8 animate-on-scroll"
             style={{
               color: "#15B4BA",
-              fontFamily: "Chicle, cursive",
+              
             }}
           >
             Why Choose Globalink?
@@ -371,7 +362,7 @@ export default function GlobalinkLanding() {
             className="text-xl text-center mb-16 font-bold animate-on-scroll"
             style={{
               color: "#3B001B",
-              fontFamily: "Inter, sans-serif",
+              
               animationDelay: "0.2s",
             }}
           >
@@ -391,7 +382,7 @@ export default function GlobalinkLanding() {
                     className="text-3xl font-bold"
                     style={{
                       color: "#3B001B",
-                      fontFamily: "Chicle, cursive",
+                      
                     }}
                   >
                     {feature.title}
@@ -410,7 +401,7 @@ export default function GlobalinkLanding() {
                       className="font-bold text-lg"
                       style={{
                         color: "#3B001B",
-                        fontFamily: "Inter, sans-serif",
+                        
                       }}
                     >
                       {feature.content}
@@ -431,7 +422,7 @@ export default function GlobalinkLanding() {
               className="text-6xl font-bold text-center mb-16 animate-on-scroll"
               style={{
                 color: "#3B001B",
-                fontFamily: "Chicle, cursive",
+                
               }}
             >
               You ask, we answer.
@@ -450,7 +441,7 @@ export default function GlobalinkLanding() {
                         className="font-bold text-lg"
                         style={{
                           color: "#3B001B",
-                          fontFamily: "Inter, sans-serif",
+                          
                         }}
                       >
                         {item.question}
@@ -476,7 +467,7 @@ export default function GlobalinkLanding() {
                           className="font-bold"
                           style={{
                             color: "#3B001B",
-                            fontFamily: "Inter, sans-serif",
+                            
                           }}
                         >
                           {item.answer}
@@ -497,7 +488,7 @@ export default function GlobalinkLanding() {
               className="text-6xl font-bold mb-4 leading-tight animate-on-scroll"
               style={{
                 color: "#3B001B",
-                fontFamily: "Chicle, cursive",
+                
               }}
             >
               From foreign to familiar –
@@ -506,7 +497,7 @@ export default function GlobalinkLanding() {
               className="text-6xl font-bold mb-8 leading-tight animate-on-scroll"
               style={{
                 color: "#3B001B",
-                fontFamily: "Chicle, cursive",
+                
                 animationDelay: "0.1s",
               }}
             >
@@ -516,7 +507,7 @@ export default function GlobalinkLanding() {
               className="text-2xl mb-12 font-bold animate-on-scroll"
               style={{
                 color: "#3B001B",
-                fontFamily: "Inter, sans-serif",
+                
                 animationDelay: "0.2s",
               }}
             >
@@ -527,7 +518,7 @@ export default function GlobalinkLanding() {
               style={{
                 backgroundColor: "#FF8873",
                 color: "#3B001B",
-                fontFamily: "Inter, sans-serif",
+                
                 animationDelay: "0.4s",
               }}
               onClick={() => window.location.href = '/login'}
@@ -545,7 +536,6 @@ export default function GlobalinkLanding() {
                 className="font-bold text-2xl transition-all duration-300 hover:scale-125 hover:text-white"
                 style={{
                   color: "#3B001B",
-                  fontFamily: "Inter, sans-serif",
                 }}
               >
                 Home
@@ -554,7 +544,6 @@ export default function GlobalinkLanding() {
                 className="font-bold text-2xl transition-all duration-300 hover:scale-125 hover:text-white"
                 style={{
                   color: "#3B001B",
-                  fontFamily: "Inter, sans-serif",
                 }}
                 onClick={() => (window.location.href = "mailto:globalink.supp@gmail.com")}
               >
@@ -564,7 +553,6 @@ export default function GlobalinkLanding() {
                 className="font-bold text-2xl transition-all duration-300 hover:scale-125 hover:text-white"
                 style={{
                   color: "#3B001B",
-                  fontFamily: "Inter, sans-serif",
                 }}
               >
                 Instagram
