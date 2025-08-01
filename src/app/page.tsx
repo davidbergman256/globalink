@@ -160,7 +160,7 @@ export default function GlobalinkLanding() {
           <div className="grid lg:grid-cols-2 gap-8 items-center relative z-20">
             <div>
               <h1
-                className="font-bold mb-6 leading-tight animate-on-scroll whitespace-nowrap font-display font-black"
+                className="font-bold mb-6 leading-tight animate-on-scroll font-display font-black"
                 style={{
                   color: "#3B001B",
                   fontSize: "65px",
@@ -168,7 +168,7 @@ export default function GlobalinkLanding() {
                   lineHeight: "90%"
                 }}
               >
-                Connect globally. Belong locally.
+                Connect globally.<br />Belong locally.
               </h1>
               <p
                 className="mb-8 leading-relaxed animate-on-scroll"
