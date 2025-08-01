@@ -10,9 +10,8 @@ const config: Config = {
     theme: {
     extend: {
       fontFamily: {
-        'inter': ['var(--font-inter)', 'Inter', 'sans-serif'],
-        'chicle': ['var(--font-chicle)', 'Chicle', 'cursive'],
-        'orelega': ['var(--font-orelega)', 'Orelega One', 'cursive'],
+        'sans': ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        'display': ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
       },
   		backgroundImage: {
   			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

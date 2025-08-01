@@ -1,29 +1,11 @@
 import type { Metadata } from 'next'
-import { Inter, Chicle, Orelega_One } from 'next/font/google'
+// Using system fonts - no Google Fonts needed
 import './globals.css'
 import SupabaseProvider from '@/components/SupabaseProvider'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
-const inter = Inter({ 
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter'
-})
-
-const chicle = Chicle({ 
-  subsets: ['latin'],
-  weight: '400',
-  display: 'swap',
-  variable: '--font-chicle'
-})
-
-const orelegaOne = Orelega_One({ 
-  subsets: ['latin'],
-  weight: '400',
-  display: 'swap',
-  variable: '--font-orelega'
-})
+// Clean system fonts - no setup needed
 
 export const metadata: Metadata = {
   title: 'GLOBALINK',
@@ -38,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head />
-      <body className={`${inter.variable} ${chicle.variable} ${orelegaOne.variable} ${inter.className}`}>
+      <body className="font-sans">
         <SupabaseProvider>
           {children}
         </SupabaseProvider>
