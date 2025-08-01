@@ -3,8 +3,10 @@
 import { useState, useEffect, useRef } from "react"
 import { ChevronDown, Plus } from "lucide-react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 export default function GlobalinkLanding() {
+  const router = useRouter()
   const [openFaq, setOpenFaq] = useState(0)
   const [openFeature, setOpenFeature] = useState(-1)
   const [scrollY, setScrollY] = useState(0)
@@ -134,14 +136,13 @@ export default function GlobalinkLanding() {
             <div 
               className="h-8 transition-transform duration-300 hover:scale-105 flex items-center"
             >
-              <span 
-                className="text-2xl font-bold font-chicle"
-                style={{
-                  color: "#3B001B"
-                }}
-              >
-                GLOBALINK
-              </span>
+              <Image 
+                src="/logo.png?v=3" 
+                alt="GLOBALINK" 
+                width={120} 
+                height={40}
+                className="h-8 w-auto"
+              />
             </div>
             <button
               className="px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-300 active:scale-95 hover:shadow-xl hover:translate-y-[-2px] font-inter"
