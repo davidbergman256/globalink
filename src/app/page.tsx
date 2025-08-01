@@ -200,7 +200,7 @@ export default function GlobalinkLanding() {
             {/* Hero Image - Right side, positioned to touch right edge */}
             <div className="relative flex items-center justify-end -mr-8">
               <Image
-                src="/hero-main.jpg"
+                src="/hero-main.png"
                 alt="Students connecting globally"
                 width={700}
                 height={700}
