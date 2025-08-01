@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom TTF Fonts */
+@font-face {
+  font-family: 'Orelega One';
+  src: url('/OrelegaOne-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter Bold';
+  src: url('/Inter_18pt-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Chicle';
+  src: url('/Chicle-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

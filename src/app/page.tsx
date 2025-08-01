@@ -145,7 +145,7 @@ export default function GlobalinkLanding() {
               />
             </div>
             <button
-              className="px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-300 active:scale-95 hover:shadow-xl hover:translate-y-[-2px] font-inter"
+              className="px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-300 active:scale-95 hover:shadow-xl hover:translate-y-[-2px] font-chicle"
               style={{
                 backgroundColor: "#FF8873",
                 color: "#3B001B"
@@ -160,7 +160,7 @@ export default function GlobalinkLanding() {
           <div className="grid lg:grid-cols-2 gap-8 items-center relative z-20">
             <div>
               <h1
-                className="font-bold mb-6 leading-tight animate-on-scroll font-poppins font-black"
+                className="font-bold mb-6 leading-tight animate-on-scroll font-orelega"
                 style={{
                   color: "#3B001B",
                   fontSize: "65px",
@@ -171,10 +171,9 @@ export default function GlobalinkLanding() {
                 Connect globally.<br />Belong locally.
               </h1>
               <p
-                className="mb-8 leading-relaxed animate-on-scroll"
+                className="mb-8 leading-relaxed animate-on-scroll font-inter-bold"
                 style={{
                   color: "#3B001B",
-                  
                   fontSize: "28px",
                   letterSpacing: "-0.04em",
                   lineHeight: "112%",
@@ -230,7 +229,7 @@ export default function GlobalinkLanding() {
                 />
               </div>
               <h3
-                className="text-3xl font-bold mb-4 font-outfit font-bold"
+                className="text-3xl font-bold mb-4 font-chicle"
                 style={{
                   color: "#3B001B",
                 }}
@@ -238,7 +237,7 @@ export default function GlobalinkLanding() {
                 Tell Us About Yourself
               </h3>
               <p
-                className="font-bold font-inter"
+                className="font-bold font-chicle"
                 style={{
                   color: "#3B001B",
                 }}
@@ -260,7 +259,7 @@ export default function GlobalinkLanding() {
                 />
               </div>
               <h3
-                className="text-3xl font-bold mb-4 font-outfit font-bold"
+                className="text-3xl font-bold mb-4 font-chicle"
                 style={{
                   color: "#3B001B",
                 }}
@@ -268,7 +267,7 @@ export default function GlobalinkLanding() {
                 Get Matched
               </h3>
               <p
-                className="font-bold font-inter"
+                className="font-bold font-chicle"
                 style={{
                   color: "#3B001B",
                 }}
@@ -290,7 +289,7 @@ export default function GlobalinkLanding() {
                 />
               </div>
               <h3
-                className="text-3xl font-bold mb-4 font-outfit font-bold"
+                className="text-3xl font-bold mb-4 font-chicle"
                 style={{
                   color: "#3B001B",
                 }}
@@ -298,7 +297,7 @@ export default function GlobalinkLanding() {
                 Meet In Person
               </h3>
               <p
-                className="font-bold font-inter"
+                className="font-bold font-chicle"
                 style={{
                   color: "#3B001B",
                 }}

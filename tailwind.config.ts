@@ -10,11 +10,9 @@ const config: Config = {
     theme: {
     extend: {
       fontFamily: {
-        'sans': ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
-        'display': ['var(--font-outfit)', 'var(--font-poppins)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
-        'inter': ['var(--font-inter)', 'Inter', 'sans-serif'],
-        'outfit': ['var(--font-outfit)', 'Outfit', 'sans-serif'],
-        'poppins': ['var(--font-poppins)', 'Poppins', 'sans-serif'],
+        'orelega': ['Orelega One', 'cursive'],
+        'inter-bold': ['Inter Bold', 'sans-serif'],
+        'chicle': ['Chicle', 'cursive'],
       },
   		backgroundImage: {
   			'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
