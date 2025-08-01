@@ -202,7 +202,7 @@ export default function Dashboard({
                 Looking for the other four
               </h2>
               <p className="text-gray-600 mb-6">
-                We&apos;re finding awesome people for you to meet. This usually takes less than 24 hours.
+                We&apos;re finding awesome people for you to meet. This usually takes less than 7 days.
               </p>
               <button
                 onClick={handleLeaveQueue}

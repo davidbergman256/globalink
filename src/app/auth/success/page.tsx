@@ -37,7 +37,7 @@ export default function AuthSuccess() {
           window.location.href = '/questionnaire'
         } else {
           // Existing user - force refresh to sync server session, then go to dashboard  
-          window.location.href = '/'
+          window.location.href = '/app'
         }
       } else {
         // No session - back to login

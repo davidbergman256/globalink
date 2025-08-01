@@ -31,7 +31,7 @@ export default function AuthForm() {
           router.push('/questionnaire')
         } else {
           // Existing user - go to dashboard
-          router.push('/')
+          router.push('/app')
         }
       }
     }

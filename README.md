@@ -21,29 +21,21 @@ A simplified meetup coordination platform for connecting strangers through organ
 
 ## Database Schema
 
-### Tables
+The application uses a comprehensive schema for user matching and group management. The complete schema is available in `database_schema.sql`.
 
-**events**
-```sql
-id UUID PRIMARY KEY DEFAULT gen_random_uuid()
-name TEXT
-activity TEXT
-date TIMESTAMPTZ
-location TEXT
-created_at TIMESTAMPTZ DEFAULT now()
-```
+### Main Tables
 
-**profiles**
-```sql
-id UUID PRIMARY KEY
-display_name TEXT UNIQUE
-avatar_url TEXT
-location TEXT
-fun_fact TEXT
-talk_for_hours TEXT
-event_id UUID REFERENCES events.id
-created_at TIMESTAMPTZ DEFAULT now()
-```
+- **profiles** - User profile information with personality traits and availability
+- **queue** - Users waiting to be matched
+- **groups** - Active meetup groups with members and event details
+- **payments** - Payment tracking for group events  
+- **rsvps** - Event attendance confirmations
+- **feedback** - Post-event user feedback
+
+### Key Functions
+
+- `get_user_current_group()` - Returns user's active group
+- `get_user_payment_status()` - Checks payment status for group events
 
 ## Setup Instructions
 
@@ -107,21 +99,14 @@ CREATE POLICY "Events are viewable by everyone" ON events
    - Create a new Edge Function named `send-welcome-email`
    - Configure email service (Resend, SendGrid, etc.)
 
-### 3. Manual Event Assignment
+### 3. Group Management
 
-To assign users to events:
+The application now uses an automated matching system:
 
-1. Go to Supabase Dashboard → Table Editor → events
-2. Insert a new event: 
-   ```sql
-   INSERT INTO events (name, activity, date, location) 
-   VALUES ('Bouldering Adventure', 'Bouldering', '2024-01-15 14:00:00', 'Brooklyn Boulders');
-   ```
-3. Go to profiles table
-4. Update user's event_id: 
-   ```sql
-   UPDATE profiles SET event_id = 'event-uuid-here' WHERE id = 'user-uuid-here';
-   ```
+1. Users sign up and complete questionnaires
+2. They join the queue for their campus
+3. Admin dashboard allows manual group creation and management
+4. Payment integration handles event fees
 
 ### 4. Installation & Development
 
@@ -145,9 +130,11 @@ Deploy to Vercel:
 
 ## Routes
 
-- `/join` - Sign-up page
-- `/login` - Sign-in page  
-- `/` - Home page (event dashboard)
+- `/` - Landing page (public)
+- `/login` - Sign-in/Sign-up page
+- `/app` - Main dashboard (protected)
+- `/questionnaire` - User onboarding form
+- `/admin` - Admin dashboard for group management
 - `/contact` - Contact information
 
 ## Architecture
