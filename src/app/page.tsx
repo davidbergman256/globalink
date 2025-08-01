@@ -375,7 +375,7 @@ export default function GlobalinkLanding() {
               animationDelay: "0.2s",
             }}
           >
-            You don't need 50 new contacts. You need 5 real ones.
+            You don&apos;t need 50 new contacts. You need 5 real ones.
           </p>
 
           <div className="space-y-6">
@@ -520,7 +520,7 @@ export default function GlobalinkLanding() {
                 animationDelay: "0.2s",
               }}
             >
-              You don't need 50 new contacts—you need 5 real ones.
+              You don&apos;t need 50 new contacts—you need 5 real ones.
             </p>
             <button
               className="px-8 py-4 rounded-full font-bold text-lg shadow-lg transition-all duration-300 active:scale-95 hover:shadow-xl hover:translate-y-[-2px] animate-on-scroll"

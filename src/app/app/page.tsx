@@ -14,6 +14,12 @@ async function getUserData() {
     redirect('/login')
   }
 
+  // Ensure user has required email field
+  const userWithEmail = {
+    ...user,
+    email: user.email || ''
+  }
+
   // Check if user has completed profile
   const { data: profile } = await supabase
     .from('profiles')
@@ -38,8 +44,8 @@ async function getUserData() {
   })
 
   let group = null
-  let groupMembers = []
-  let payments = []
+  let groupMembers: any[] = []
+  let payments: any[] = []
 
   if (currentGroup && currentGroup.length > 0) {
     const groupData = currentGroup[0]
@@ -73,12 +79,12 @@ async function getUserData() {
   }
 
   return {
-    user,
+    user: userWithEmail,
     profile,
     queueEntry,
-    group,
-    groupMembers,
-    payments
+    currentGroup: group,
+    paymentStatus: null,
+    pastGroups: []
   }
 }
 
