@@ -1,11 +1,28 @@
 import type { Metadata } from 'next'
-// Using system fonts - no Google Fonts needed
+import { Inter, Outfit, Poppins } from 'next/font/google'
 import './globals.css'
 import SupabaseProvider from '@/components/SupabaseProvider'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
-// Clean system fonts - no setup needed
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter'
+})
+
+const outfit = Outfit({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-outfit'
+})
+
+const poppins = Poppins({ 
+  subsets: ['latin'],
+  weight: ['400', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-poppins'
+})
 
 export const metadata: Metadata = {
   title: 'GLOBALINK',
@@ -20,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head />
-      <body className="font-sans">
+      <body className={`${inter.variable} ${outfit.variable} ${poppins.variable} font-sans`}>
         <SupabaseProvider>
           {children}
         </SupabaseProvider>
