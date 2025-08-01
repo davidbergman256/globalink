@@ -160,7 +160,7 @@ export default function GlobalinkLanding() {
           <div className="grid lg:grid-cols-2 gap-8 items-center relative z-20">
             <div>
               <h1
-                className="font-bold mb-6 leading-tight animate-on-scroll font-orelega"
+                className="font-bold mb-6 leading-tight animate-on-scroll font-chicle"
                 style={{
                   color: "#3B001B",
                   fontSize: "65px",
@@ -171,7 +171,7 @@ export default function GlobalinkLanding() {
                 Connect globally.<br />Belong locally.
               </h1>
               <p
-                className="mb-8 leading-relaxed animate-on-scroll font-inter-bold"
+                className="mb-8 leading-relaxed animate-on-scroll font-orelega"
                 style={{
                   color: "#3B001B",
                   fontSize: "28px",
@@ -202,9 +202,9 @@ export default function GlobalinkLanding() {
               <Image
                 src="/hero-main.jpg"
                 alt="Students connecting globally"
-                width={600}
-                height={500}
-                className="w-full max-w-[600px] h-auto object-contain rounded-2xl"
+                width={700}
+                height={700}
+                className="w-full max-w-[700px] h-auto object-contain rounded-2xl"
                 priority
               />
             </div>
