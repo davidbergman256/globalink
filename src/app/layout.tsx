@@ -24,7 +24,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/favicon.png" />
       </head>
-      <body className="font-chicle">
+      <body className="font-inter">
         <SupabaseProvider>
           {children}
         </SupabaseProvider>

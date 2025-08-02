@@ -83,7 +83,7 @@ export default function GlobalinkLanding() {
   ]
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden" style={{ backgroundColor: "#F9F6EE" }}>
+    <div className="min-h-screen relative overflow-x-hidden font-chicle" style={{ backgroundColor: "#F9F6EE" }}>
       <style jsx global>{`
         @keyframes fadeInUp {
           from {
